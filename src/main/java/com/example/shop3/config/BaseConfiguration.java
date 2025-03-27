@@ -30,10 +30,10 @@ public class BaseConfiguration {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(req ->
                 req.
-                        requestMatchers("/").permitAll().
+                        requestMatchers("/").permitAll()
+                        .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
 
-
-                        anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
               //  .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form.loginPage("/login").permitAll())

@@ -1,10 +1,177 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="https://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به کتابفروشی</title>
+    <style>
+        /* استفاده از فونت وزیر (مطمئن شوید فونت در دسترس است یا از CDN استفاده کنید) */
+        /* @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css'); */
+
+        body {
+            font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه شما */
+            background-color: #f4f7f6; /* یک پس‌زمینه ملایم */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* برای قرارگیری فرم در مرکز صفحه عمودی */
+            margin: 0;
+            direction: rtl; /* تضمین راست‌چین بودن کل صفحه */
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px; /* حداکثر عرض فرم */
+            box-sizing: border-box; /* برای محاسبه صحیح width با padding */
+            text-align: center;
+        }
+
+        .login-container h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        /* نمایش پیام‌های خطا یا خروج */
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success { /* برای پیام خروج موفق */
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right; /* لیبل‌ها راست‌چین */
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffc107; /* رنگ زرد مشابه ناوبری */
+            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #ffc107; /* رنگ زرد */
+            border: none;
+            border-radius: 5px;
+            color: #333; /* متن تیره روی دکمه زرد */
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px; /* فاصله از آخرین فیلد */
+        }
+
+        .login-button:hover {
+            background-color: #e0a800; /* زرد تیره‌تر برای هاور */
+        }
+
+        .signup-link {
+            margin-top: 25px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: #007bff; /* رنگ لینک استاندارد آبی */
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* کمی ریسپانسیو سازی برای صفحه‌های خیلی کوچک */
+        @media (max-width: 450px) {
+            .login-container {
+                padding: 20px 25px;
+                margin: 15px; /* فاصله از کناره‌ها در موبایل */
+                max-width: none; /* اجازه می‌دهد تمام عرض را بگیرد */
+            }
+            .login-container h2 {
+                margin-bottom: 20px;
+                font-size: 1.5em;
+            }
+        }
+
+    </style>
 </head>
 <body>
+
+<div class="login-container">
+    <h2>ورود به حساب کاربری</h2>
+
+    <!-- نمایش پیام خطا در صورت ناموفق بودن ورود -->
+    <div th:if="${param.error}" class="alert alert-danger">
+        نام کاربری یا رمز عبور وارد شده صحیح نمی‌باشد.
+    </div>
+
+    <!-- نمایش پیام خروج موفق -->
+    <div th:if="${param.logout}" class="alert alert-success">
+        شما با موفقیت از حساب خود خارج شدید.
+    </div>
+
+    <!-- فرم ورود -->
+    <!-- اکشن فرم به /login اشاره می‌کند که توسط Spring Security پردازش می‌شود -->
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="username">نام کاربری:</label>
+            <!-- نام input باید username باشد -->
+            <input type="text" id="username" name="username" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password">رمز عبور:</label>
+            <!-- نام input باید password باشد -->
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="login-button">ورود</button>
+    </form>
+
+    <!-- لینک ثبت نام -->
+    <p class="signup-link">
+        هنوز ثبت نام نکرده‌اید؟
+        <a th:href="@{/signup}">اینجا ثبت نام کنید</a>
+        <!-- آدرس signup را بعدا باید در کنترلر خود مدیریت کنید -->
+    </p>
+</div>
 
 </body>
 </html>

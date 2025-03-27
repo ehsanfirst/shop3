@@ -1,10 +1,268 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="https://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کتابفروشی آنلاین</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه دیگر */
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Header Styles */
+        .main-header {
+            background-color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo a {
+            text-decoration: none;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50; /* رنگ لوگو */
+        }
+        /* اگر لوگوی تصویری دارید:
+        .logo img { height: 40px; }
+        */
+
+        .search-bar {
+            flex-grow: 1; /* باعث می‌شود نوار جستجو فضای خالی بین لوگو و اکشن‌ها را پر کند */
+            margin: 0 40px; /* فاصله از لوگو و اکشن‌ها */
+            position: relative; /* برای قرارگیری آیکون جستجو */
+        }
+
+        .search-bar input[type="search"] {
+            width: 100%;
+            padding: 10px 40px 10px 15px; /* فضای کافی برای آیکون در سمت راست */
+            border: 1px solid #ced4da;
+            border-radius: 20px; /* گوشه‌های گرد */
+            font-size: 1em;
+            box-sizing: border-box; /* جلوگیری از بزرگتر شدن به خاطر پدینگ */
+        }
+        /* افزودن آیکون جستجو (نیاز به کتابخانه آیکون مثل FontAwesome یا استفاده از تصویر) */
+        .search-bar::after {
+            content: '🔍'; /* یا کد آیکون فونت */
+            position: absolute;
+            right: 15px; /* تنظیم موقعیت آیکون */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            pointer-events: none; /* جلوگیری از کلیک روی آیکون */
+        }
+
+
+        .user-actions a {
+            text-decoration: none;
+            color: #555;
+            margin-left: 20px; /* فاصله بین لینک‌ها */
+            font-size: 0.95em;
+            padding: 8px 15px;
+            border: 1px solid transparent; /* برای حفظ فضا */
+            border-radius: 15px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .user-actions a:hover {
+            background-color: #f1f1f1;
+            border-color: #ddd;
+        }
+        .user-actions .login-btn { /* استایل خاص برای دکمه ورود */
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+        }
+
+
+        /* Navigation Bar Styles */
+        .main-nav {
+            background-color: #ffc107; /* رنگ زرد شبیه نمونه */
+            padding: 12px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .main-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .main-nav li {
+            display: inline-block;
+            margin: 0 25px; /* فاصله بیشتر بین آیتم‌های منو */
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: #333; /* رنگ متن تیره‌تر روی پس‌زمینه زرد */
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.2s;
+        }
+        .main-nav a:hover {
+            color: #000; /* تیره‌تر شدن رنگ هنگام هاور */
+        }
+
+        /* Hero Section Styles */
+        .hero-section {
+            width: 100%;
+            margin-top: 1px; /* برای جدا شدن کامل از نوبار */
+        }
+
+        .hero-section img {
+            width: 100%;
+            height: auto; /* حفظ نسبت تصویر */
+            display: block; /* حذف فضای خالی زیر تصویر */
+            max-height: 55vh; /* محدود کردن ارتفاع تصویر بزرگ */
+            object-fit: cover; /* پوشاندن کامل فضا، ممکن است بخشی از تصویر بریده شود */
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .content-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #343a40;
+        }
+        .book-grid {
+            display: flex;
+            justify-content: center;
+            gap: 25px; /* فاصله بین آیتم‌ها */
+            flex-wrap: wrap; /* اجازه شکستن خط در صفحه‌های کوچک */
+        }
+        .book-placeholder { /* استایل برای نمایش جای خالی کتاب‌ها */
+            border: 1px solid #e0e0e0;
+            background-color: #fff;
+            padding: 15px;
+            width: 180px; /* عرض حدودی هر کتاب */
+            height: 280px; /* ارتفاع حدودی */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #aaa;
+        }
+
+        /* Footer Styles */
+        .main-footer {
+            background-color: #343a40; /* پس زمینه تیره */
+            color: #f8f9fa; /* متن روشن */
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .main-footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                padding: 10px 15px;
+            }
+            .search-bar {
+                margin: 15px 0;
+                width: 90%;
+            }
+            .user-actions {
+                margin-top: 10px;
+            }
+            .main-nav li {
+                margin: 0 10px;
+            }
+            .hero-section img {
+                max-height: 40vh;
+            }
+            .book-placeholder {
+                width: 140px;
+                height: 220px;
+            }
+        }
+
+    </style>
+    <!-- افزودن فونت وزیر (اختیاری - فایل فونت باید موجود باشد یا از CDN استفاده شود) -->
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
 </head>
 <body>
+
+<header class="main-header">
+    <div class="logo">
+        <!-- اینجا می‌توانید لوگوی خود را قرار دهید (متن یا تصویر) -->
+        <a th:href="@{/}">کتابفروشی من</a>
+        <!-- <img th:src="@{/images/logo.png}" alt="لوگو"/> -->
+    </div>
+    <div class="search-bar">
+        <form action="#" th:action="@{/search}" method="get">
+            <input type="search" name="q" placeholder="جستجو در عناوین، نویسندگان و محصولات...">
+        </form>
+    </div>
+    <div class="user-actions">
+        <!-- آیکون سبد خرید (نیاز به آیکون) -->
+        <a href="#">🛒</a>
+        <!-- لینک ورود / عضویت -->
+        <a th:href="@{/login}" class="login-btn">ورود / عضویت</a>
+    </div>
+</header>
+
+<nav class="main-nav">
+    <ul>
+        <li><a th:href="@{/categories/fiction}">داستانی</a></li>
+        <li><a th:href="@{/categories/non-fiction}">غیرداستانی</a></li>
+        <li><a th:href="@{/categories/children}">کودک و نوجوان</a></li>
+        <li><a th:href="@{/new-arrivals}">تازه‌های نشر</a></li>
+        <li><a th:href="@{/best-sellers}">پرفروش‌ها</a></li>
+        <li><a th:href="@{/gift-cards}">کارت هدیه</a></li>
+    </ul>
+</nav>
+
+<section class="hero-section">
+    <!-- نمایش تصویر اصلی شما -->
+    <img th:src="@{/images/page/page1.jpg}" alt="بنر اصلی کتابفروشی"/>
+</section>
+
+<main>
+    <!-- بخش نمایش کتاب‌های نمونه -->
+    <section class="content-section">
+        <h2>تازه‌های کتاب بزرگسال</h2>
+        <div class="book-grid">
+            <!-- اینجا در آینده لیست واقعی کتاب‌ها با th:each قرار می‌گیرد -->
+            <div class="book-placeholder">کتاب ۱</div>
+            <div class="book-placeholder">کتاب ۲</div>
+            <div class="book-placeholder">کتاب ۳</div>
+            <div class="book-placeholder">کتاب ۴</div>
+            <div class="book-placeholder">کتاب ۵</div>
+        </div>
+    </section>
+
+    <section class="content-section" style="background-color: #e9ecef;"> <!-- پس زمینه متفاوت برای تمایز -->
+        <h2>پرفروش‌ترین‌ها</h2>
+        <div class="book-grid">
+            <div class="book-placeholder">کتاب ۶</div>
+            <div class="book-placeholder">کتاب ۷</div>
+            <div class="book-placeholder">کتاب ۸</div>
+            <div class="book-placeholder">کتاب ۹</div>
+            <div class="book-placeholder">کتاب ۱۰</div>
+        </div>
+    </section>
+    <!-- می‌توانید بخش‌های بیشتری اضافه کنید -->
+</main>
+
+<footer class="main-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
 
 </body>
 </html>
