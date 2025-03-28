@@ -1,10 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>کتابفروشی آنلاین</title>
     <style>
+        .user-actions .user-avatar {
+            width: 35px; /* کوچکتر شد */
+            height: 35px; /* کوچکتر شد */
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-left: 10px;
+            /* اضافه کردن این خط برای اینکه شبیه دکمه، قابل کلیک به نظر برسه */
+            cursor: pointer;
+        }
+
+        .user-actions .logout-btn {
+            background-color: #dc3545; /* رنگ قرمز برای خروج */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 20px; /* مشابه سایر لینک‌ها */
+            vertical-align: middle;
+        }
+        .user-actions .logout-btn:hover {
+            background-color: #c82333;
+        }
         body {
             margin: 0;
             font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه دیگر */
@@ -210,11 +237,36 @@
         </form>
     </div>
     <div class="user-actions">
-        <!-- آیکون سبد خرید (نیاز به آیکون) -->
-        <a href="#">🛒</a>
-        <!-- لینک ورود / عضویت -->
-        <a th:href="@{/login}" class="login-btn">ورود / عضویت</a>
+        <!-- نمایش آواتار و لینک خروج برای کاربر لاگین کرده -->
+        <div sec:authorize="isAuthenticated()">
+            <!-- لینک سبد خرید -->
+            <a th:href="@{/cart}">🛒</a>
+
+            <!-- آواتار حالا یک لینک است -->
+            <a th:href="@{/profile}" style="text-decoration: none; display: inline-block; vertical-align: middle;"> <!-- آدرس صفحه پروفایل کاربر -->
+                <!-- نمایش آواتار کاربر -->
+                <img th:if="${#authentication.principal.userEntity.avatar != null and !#authentication.principal.userEntity.avatar.isEmpty()}"
+                     th:src="@{${#authentication.principal.userEntity.avatar}}"
+                     alt="آواتار کاربر" class="user-avatar"/>
+                <!-- نمایش آواتار پیش‌فرض اگر کاربر آواتار نداشت -->
+                <img th:unless="${#authentication.principal.userEntity.avatar != null and !#authentication.principal.userEntity.avatar.isEmpty()}"
+                     th:src="@{/images/avatar/default-avatar.png}"
+                     alt="آواتار پیش‌فرض" class="user-avatar"/>
+            </a>
+
+            <!-- لینک خروج -->
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-btn">خروج</button>
+            </form>
+        </div>
+
+        <!-- نمایش لینک ورود/عضویت برای کاربر مهمان -->
+        <div sec:authorize="!isAuthenticated()">
+            <a href="#">🛒</a>
+            <a th:href="@{/login}" class="login-btn">ورود / عضویت</a>
+        </div>
     </div>
+
 </header>
 
 <nav class="main-nav">

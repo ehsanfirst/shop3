@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت نام کاربر جدید - کتابفروشی آنلاین</title>
+    <style>
+        /* --- استایل‌های مشابه index.html --- */
+        body {
+            margin: 0;
+            font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه */
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-header, .main-footer { /* استایل‌های پایه هدر و فوتر برای سادگی */
+            background-color: #fff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center; /* هدر ساده برای صفحه رجیستر */
+        }
+        .main-header a {
+            text-decoration: none;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .main-footer {
+            background-color: #343a40;
+            color: #f8f9fa;
+            padding: 20px;
+            margin-top: auto; /* فوتر را به پایین می‌چسباند */
+            border-top: 1px solid #444;
+            border-bottom: none;
+            box-shadow: none;
+        }
+        .main-footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        /* --- استایل‌های مخصوص فرم ثبت نام --- */
+        .form-container {
+            max-width: 500px; /* عرض فرم */
+            margin: 40px auto; /* وسط‌چین کردن و فاصله از بالا/پایین */
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px; /* فاصله بین هر گروه فیلد */
+        }
+
+        .form-group label {
+            display: block; /* لیبل بالای فیلد */
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-control, .form-control-file {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box; /* جلوگیری از بزرگتر شدن به خاطر پدینگ */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        /* استایل جدا برای فایل چون ظاهر متفاوتی دارد */
+        .form-control-file {
+            padding: 8px;
+            /* ممکن است نیاز به استایل بیشتر برای ظاهر بهتر در مرورگرهای مختلف باشد */
+        }
+
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #fff;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: #007bff; /* رنگ آبی اصلی */
+            border: 1px solid #007bff;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            border-radius: 5px;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            width: 100%; /* دکمه تمام عرض */
+        }
+        .btn:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        /* --- استایل برای نمایش خطاها --- */
+        .error-message {
+            color: #dc3545; /* قرمز برای خطا */
+            font-size: 0.85em;
+            margin-top: 5px;
+            padding: 5px 0;
+        }
+        /* برای خطاهای کلی */
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid transparent;
+        }
+        .alert-danger p { margin: 0;}
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<header class="main-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+</header>
+
+<div class="form-container">
+    <h2>ثبت نام کاربر جدید</h2>
+
+    <!-- نمایش خطاهای کلی ثبت نام یا فایل -->
+    <div th:if="${registrationError}" class="alert alert-danger">
+        <p th:text="${registrationError}"></p>
+    </div>
+    <div th:if="${globalError}" class="alert alert-danger">
+        <p th:text="${globalError}"></p>
+    </div>
+
+
+    <!-- شروع فرم -->
+    <!-- مهم: enctype="multipart/form-data" برای آپلود فایل ضروری است -->
+    <form th:action="@{/register}" method="post" th:object="${user}" enctype="multipart/form-data" novalidate>
+        <!-- novalidate باعث می شود اعتبارسنجی پیش فرض HTML5 غیرفعال شود تا فقط اعتبارسنجی بک اند اعمال شود -->
+
+        <!-- فیلد نام کاربری -->
+        <div class="form-group">
+            <label for="username">نام کاربری:</label>
+            <input type="text" id="username" class="form-control" th:field="*{username}"
+                   aria-describedby="usernameHelp" required/>
+            <!-- نمایش خطای مربوط به نام کاربری -->
+            <div id="usernameHelp" th:if="${#fields.hasErrors('username')}" class="error-message">
+                <p th:errors="*{username}"></p>
+            </div>
+        </div>
+
+        <!-- فیلد ایمیل -->
+        <div class="form-group">
+            <label for="email">ایمیل:</label>
+            <input type="email" id="email" class="form-control" th:field="*{email}"
+                   aria-describedby="emailHelp" required/>
+            <!-- نمایش خطای مربوط به ایمیل -->
+            <div id="emailHelp" th:if="${#fields.hasErrors('email')}" class="error-message">
+                <p th:errors="*{email}"></p>
+            </div>
+        </div>
+
+        <!-- فیلد رمز عبور -->
+        <div class="form-group">
+            <label for="password">رمز عبور:</label>
+            <input type="password" id="password" class="form-control" th:field="*{password}"
+                   aria-describedby="passwordHelp" required/>
+            <!-- نمایش خطای مربوط به رمز عبور -->
+            <!-- نکته: برای پسورد بهتر است جزئیات خطا (مثلا حداقل طول) با پیام مناسب نمایش داده شود -->
+            <small style="font-size: 0.8em; color: #6c757d;">(حداقل ۸ کاراکتر)</small> <!-- مثال راهنمای طول پسورد -->
+            <div id="passwordHelp" th:if="${#fields.hasErrors('password')}" class="error-message">
+                <p th:errors="*{password}"></p>
+            </div>
+        </div>
+
+        <!-- فیلد آپلود آواتار -->
+        <div class="form-group">
+            <label for="avatarFile">آواتار (اختیاری - فقط JPG/PNG/GIF):</label>
+            <input type="file" id="avatarFile" name="avatarFile" class="form-control-file"
+                   accept="image/jpeg, image/png, image/gif" aria-describedby="fileHelp"/>
+            <!-- نمایش خطای مربوط به فایل -->
+            <div id="fileHelp" th:if="${fileError}" class="error-message">
+                <p th:text="${fileError}"></p>
+            </div>
+        </div>
+
+        <!-- دکمه ثبت نام -->
+        <div class="form-group">
+            <button type="submit" class="btn">ثبت نام</button>
+        </div>
+
+    </form> <!-- پایان فرم -->
+
+    <div class="login-link">
+        قبلاً ثبت نام کرده‌اید؟ <a th:href="@{/login}">وارد شوید</a>
+    </div>
+
+</div><!-- .form-container -->
+
+<footer class="main-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+</body>
+</html>
