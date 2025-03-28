@@ -2,9 +2,8 @@ package com.example.shop3.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp; // یا از Spring Data JPA Auditing
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.math.BigDecimal; // برای محاسبه قیمت کل
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

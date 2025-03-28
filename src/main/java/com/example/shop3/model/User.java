@@ -1,14 +1,13 @@
 package com.example.shop3.model;
 
 import jakarta.persistence.*;
-import lombok.*; // اضافه کردن @ToString و @EqualsAndHashCode
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-// import org.springframework.data.annotation.CreatedDate; // اگر از Auditing استفاده می‌کنید، یکی را انتخاب کنید
 
 import java.time.LocalDateTime;
-import java.util.ArrayList; // اضافه شد
-import java.util.List;     // اضافه شد
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data // شامل @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor

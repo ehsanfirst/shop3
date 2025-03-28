@@ -29,9 +29,11 @@
             margin-left: 20px; /* مشابه سایر لینک‌ها */
             vertical-align: middle;
         }
+
         .user-actions .logout-btn:hover {
             background-color: #c82333;
         }
+
         body {
             margin: 0;
             font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه دیگر */
@@ -56,6 +58,7 @@
             font-weight: bold;
             color: #2c3e50; /* رنگ لوگو */
         }
+
         /* اگر لوگوی تصویری دارید:
         .logo img { height: 40px; }
         */
@@ -74,6 +77,7 @@
             font-size: 1em;
             box-sizing: border-box; /* جلوگیری از بزرگتر شدن به خاطر پدینگ */
         }
+
         /* افزودن آیکون جستجو (نیاز به کتابخانه آیکون مثل FontAwesome یا استفاده از تصویر) */
         .search-bar::after {
             content: '🔍'; /* یا کد آیکون فونت */
@@ -96,10 +100,12 @@
             border-radius: 15px;
             transition: background-color 0.2s, border-color 0.2s;
         }
+
         .user-actions a:hover {
             background-color: #f1f1f1;
             border-color: #ddd;
         }
+
         .user-actions .login-btn { /* استایل خاص برای دکمه ورود */
             background-color: #e9ecef;
             border: 1px solid #ced4da;
@@ -132,6 +138,7 @@
             font-size: 1.1em;
             transition: color 0.2s;
         }
+
         .main-nav a:hover {
             color: #000; /* تیره‌تر شدن رنگ هنگام هاور */
         }
@@ -155,17 +162,20 @@
             padding: 40px 30px;
             text-align: center;
         }
+
         .content-section h2 {
             font-size: 1.8em;
             margin-bottom: 30px;
             color: #343a40;
         }
+
         .book-grid {
             display: flex;
             justify-content: center;
             gap: 25px; /* فاصله بین آیتم‌ها */
             flex-wrap: wrap; /* اجازه شکستن خط در صفحه‌های کوچک */
         }
+
         .book-placeholder { /* استایل برای نمایش جای خالی کتاب‌ها */
             border: 1px solid #e0e0e0;
             background-color: #fff;
@@ -177,7 +187,7 @@
             justify-content: center;
             align-items: center;
             border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             color: #aaa;
         }
 
@@ -189,6 +199,7 @@
             padding: 20px;
             margin-top: 40px;
         }
+
         .main-footer p {
             margin: 0;
             font-size: 0.9em;
@@ -200,19 +211,24 @@
                 flex-direction: column;
                 padding: 10px 15px;
             }
+
             .search-bar {
                 margin: 15px 0;
                 width: 90%;
             }
+
             .user-actions {
                 margin-top: 10px;
             }
+
             .main-nav li {
                 margin: 0 10px;
             }
+
             .hero-section img {
                 max-height: 40vh;
             }
+
             .book-placeholder {
                 width: 140px;
                 height: 220px;
@@ -243,7 +259,8 @@
             <a th:href="@{/cart}">🛒</a>
 
             <!-- آواتار حالا یک لینک است -->
-            <a th:href="@{/profile}" style="text-decoration: none; display: inline-block; vertical-align: middle;"> <!-- آدرس صفحه پروفایل کاربر -->
+            <a th:href="@{/profile}" style="text-decoration: none; display: inline-block; vertical-align: middle;">
+                <!-- آدرس صفحه پروفایل کاربر -->
                 <!-- نمایش آواتار کاربر -->
                 <img th:if="${#authentication.principal.userEntity.avatar != null and !#authentication.principal.userEntity.avatar.isEmpty()}"
                      th:src="@{${#authentication.principal.userEntity.avatar}}"

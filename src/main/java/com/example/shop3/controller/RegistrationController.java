@@ -1,14 +1,10 @@
 package com.example.shop3.controller;
 
 import com.example.shop3.dto.UserRequest;
-import com.example.shop3.model.User;
 import com.example.shop3.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,11 +36,11 @@ public class RegistrationController {
     private static final String AVATAR_URL_PREFIX = "/avatars/";
 
     // متد برای ایجاد پوشه آپلود در صورت عدم وجود (فراخوانی در متد POST)
-    private Path ensureUploadDirectoryExists()throws IOException {
+    private Path ensureUploadDirectoryExists() throws IOException {
         Path path = Paths.get(uploadDir);
-        if(!Files.exists(path)){
+        if (!Files.exists(path)) {
             Files.createDirectories(path);
-            System.out.println("the path is created by url: "  + uploadDir);
+            System.out.println("the path is created by url: " + uploadDir);
         }
         return path;
     }
@@ -52,7 +48,7 @@ public class RegistrationController {
     //به صفحه بفهمونیم چه فیلدایی داره
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user",new UserRequest());
+        model.addAttribute("user", new UserRequest());
         return "register";
     }
 
@@ -95,7 +91,7 @@ public class RegistrationController {
                 fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
             // بررسی پسوندهای مجاز (مثال)
-            if (!fileExtension.equalsIgnoreCase(".jpg") && !fileExtension.equalsIgnoreCase(".jpeg") && !fileExtension.equalsIgnoreCase(".png") && !fileExtension.equalsIgnoreCase(".gif")){
+            if (!fileExtension.equalsIgnoreCase(".jpg") && !fileExtension.equalsIgnoreCase(".jpeg") && !fileExtension.equalsIgnoreCase(".png") && !fileExtension.equalsIgnoreCase(".gif")) {
                 model.addAttribute("fileError", "فرمت فایل تصویر مجاز نیست (فقط jpg, png, gif).");
                 return "register";
             }
@@ -147,7 +143,7 @@ public class RegistrationController {
             if (e.getMessage().contains("ConstraintViolationException") /* بررسی دقیق تر لازم است */) {
                 if (e.getMessage().contains("users_username_key") || e.getMessage().contains("USERNAME")) { // نام constraint ممکن است متفاوت باشد
                     bindingResult.rejectValue("username", "error.user", "این نام کاربری قبلا ثبت شده است.");
-                } else if (e.getMessage().contains("users_email_key")|| e.getMessage().contains("EMAIL")) {
+                } else if (e.getMessage().contains("users_email_key") || e.getMessage().contains("EMAIL")) {
                     bindingResult.rejectValue("email", "error.user", "این ایمیل قبلا ثبت شده است.");
                 } else {
                     model.addAttribute("registrationError", "خطا در ثبت نام. لطفا اطلاعات را بررسی کنید.");
@@ -158,7 +154,6 @@ public class RegistrationController {
             return "register";
         }
     }
-
 
 
 }//class

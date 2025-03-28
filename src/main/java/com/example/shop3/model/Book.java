@@ -7,9 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet; // اضافه شد
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;    // اضافه شد
+import java.util.Set;
 
 @Entity
 @Table(name = "book")
@@ -53,7 +53,7 @@ public class Book {
     private List<Item> items = new ArrayList<>();
 
     // --- شروع بخش اضافه شده برای رابطه چند-به-چند با Tag ---
-    @ManyToMany(fetch = FetchType.LAZY /*, cascade = { CascadeType.PERSIST, CascadeType.MERGE } */ )
+    @ManyToMany(fetch = FetchType.LAZY /*, cascade = { CascadeType.PERSIST, CascadeType.MERGE } */)
     @JoinTable(
             name = "book_tag", // نام جدول اتصال (واسط)
             joinColumns = @JoinColumn(name = "book_id"), // ستون FK اشاره کننده به Book (این کلاس)
