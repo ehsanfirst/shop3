@@ -1,9 +1,12 @@
 package com.example.shop3.service;
 
 import com.example.shop3.config.SecurityUserDetails;
+import com.example.shop3.dto.CartSummaryDTO;
 import com.example.shop3.dto.UserRequest;
+import com.example.shop3.model.Cart;
 import com.example.shop3.model.Role;
 import com.example.shop3.model.User;
+import com.example.shop3.repository.CartRepository;
 import com.example.shop3.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,11 +16,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
+    private final CartRepository cartRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -45,6 +53,7 @@ public class UserService implements UserDetailsService {
         newUserEntity.setUsername(userRequest.getUsername());
         newUserEntity.setEmail(userRequest.getEmail());
         newUserEntity.setPassword(passwordEncoder.encode(userRequest.getPassword())); // انکود کردن پسورد
+
         if (avatarUrl != null) {
             newUserEntity.setAvatar(avatarUrl);
         }
@@ -64,4 +73,6 @@ public class UserService implements UserDetailsService {
         }
     }
 
-}
+
+
+}//class

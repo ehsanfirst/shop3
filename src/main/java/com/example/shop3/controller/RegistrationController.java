@@ -35,15 +35,7 @@ public class RegistrationController {
 
     private static final String AVATAR_URL_PREFIX = "/avatars/";
 
-    // متد برای ایجاد پوشه آپلود در صورت عدم وجود (فراخوانی در متد POST)
-    private Path ensureUploadDirectoryExists() throws IOException {
-        Path path = Paths.get(uploadDir);
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-            System.out.println("the path is created by url: " + uploadDir);
-        }
-        return path;
-    }
+
 
     //به صفحه بفهمونیم چه فیلدایی داره
     @GetMapping("/register")
@@ -54,7 +46,7 @@ public class RegistrationController {
 
     @PostMapping("/register")
     public String processRegistration(
-            @Valid @ModelAttribute("user") UserRequest user, // یا DTO
+            @Valid @ModelAttribute("user") UserRequest user, // با DTO
             BindingResult bindingResult,
             @RequestParam("avatarFile") MultipartFile avatarFile,
             RedirectAttributes redirectAttributes,
@@ -153,7 +145,16 @@ public class RegistrationController {
             }
             return "register";
         }
-    }
+    }//method
 
+    // متد برای ایجاد پوشه آپلود در صورت عدم وجود (فراخوانی در متد POST)
+    private Path ensureUploadDirectoryExists() throws IOException {
+        Path path = Paths.get(uploadDir);
+        if (!Files.exists(path)) {
+            Files.createDirectories(path);
+            System.out.println("the path is created by url: " + uploadDir);
+        }
+        return path;
+    }
 
 }//class

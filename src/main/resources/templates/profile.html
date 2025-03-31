@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پروفایل کاربری</title>
+    <!-- استایل های پایه - می توانید بعدا به یک فایل CSS خارجی منتقل کنید -->
+    <style>
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ... (استایل های قبلی) ... */
+
+        /* استایل پایه دکمه (می توانید عمومی تر تعریف کنید) */
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #fff; /* رنگ متن پیش فرض برای دکمه ها */
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: #007bff; /* رنگ پیش فرض آبی */
+            border: 1px solid #007bff;
+            padding: 8px 15px; /* کمی کوچکتر از دکمه های فرم */
+            font-size: 0.95em;
+            line-height: 1.5;
+            border-radius: 5px;
+            text-decoration: none; /* حذف زیرخط لینک */
+            transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        /* استایل مخصوص دکمه افزودن کتاب */
+        .add-book-btn {
+            background-color: #28a745; /* رنگ سبز برای افزودن */
+            border-color: #28a745;
+            color: white; /* متن سفید روی سبز */
+        }
+
+        .add-book-btn:hover {
+            background-color: #218838; /* سبز تیره تر برای هاور */
+            border-color: #1e7e34;
+        }
+
+        /* ... (بقیه استایل ها) ... */
+
+        /* هدر و فوتر ساده برای این صفحه - بهتر است از فرگمنت استفاده شود */
+        .page-header, .page-footer {
+            background-color: #fff;
+            padding: 15px 30px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer { margin-top: auto; background-color: #343a40; color: #f8f9fa; padding: 20px; border-top: 1px solid #444; border-bottom: none; box-shadow: none;}
+        .page-footer p { margin: 0; font-size: 0.9em; }
+
+        .profile-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 25px; /* فاصله از اطلاعات متنی */
+            border: 2px solid #ddd;
+        }
+        .user-details p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .user-details p strong {
+            color: #333;
+            min-width: 120px; /* برای تراز بهتر */
+            display: inline-block;
+        }
+        .section-title {
+            font-size: 1.4em;
+            color: #343a40;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ffc107; /* خط زرد زیر عنوان */
+            display: inline-block; /* تا border فقط زیر متن بیفتد */
+        }
+        .carts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .carts-table th, .carts-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: right;
+            vertical-align: middle;
+        }
+        .carts-table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .carts-table tbody tr:nth-child(odd) {
+            background-color: #f8f9fa; /* یکی در میان رنگی */
+        }
+        .carts-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .no-carts {
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 15px;
+        }
+        /* استایل برای لینک جزئیات سبد (روی شماره ردیف) */
+        .cart-details-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .cart-details-link:hover {
+            text-decoration: underline;
+        }
+        .status-active { color: green; font-weight: bold; }
+        .status-ordered { color: blue; }
+        .status-abandoned { color: gray; }
+
+    </style>
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<!-- هدر ساده - بهتر است از th:replace برای هدر اصلی استفاده کنید -->
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+    <!-- اینجا می توانید لینک خروج و ... را هم بگذارید -->
+</header>
+
+<div class="profile-container" th:if="${userProfile}"> <!-- فقط اگر userProfile وجود داشت نمایش بده -->
+
+    <h2 class="section-title">اطلاعات کاربری</h2>
+    <div class="user-info">
+        <!-- نمایش آواتار کاربر -->
+        <img th:if="${userProfile.avatar != null and !userProfile.avatar.isEmpty()}"
+             th:src="@{${userProfile.avatar}}" alt="آواتار" class="user-avatar"/>
+        <!-- نمایش آواتار پیش فرض -->
+        <img th:unless="${userProfile.avatar != null and !userProfile.avatar.isEmpty()}"
+             th:src="@{/images/avatar/default-avatar.png}" alt="آواتار پیش فرض" class="user-avatar"/>
+
+
+            <div class="user-details">
+                <p><strong>نام کاربری:</strong> <span th:text="${userProfile.username}">نام کاربر</span></p>
+                <p><strong>ایمیل:</strong> <span th:text="${userProfile.email}">ایمیل کاربر</span></p>
+                <p><strong>تعداد کتاب‌های من:</strong> <span th:text="${userProfile.numberOfOwnedBooks}">0</span></p>
+
+                <!-- **** خط جدید اضافه شده **** -->
+                <p style="margin-top: 15px;"> <!-- کمی فاصله از بالا -->
+                    <a th:href="@{/books/new}" class="btn add-book-btn">افزودن کتاب جدید</a>
+                    <!-- آدرس /books/new فرضی است، باید کنترلر آن را بعدا بسازیم -->
+                </p>
+                <!-- **** پایان خط جدید **** -->
+
+                <!-- می توانید لینک ویرایش پروفایل را اینجا اضافه کنید -->
+            </div>
+    </div>
+
+    <h2 class="section-title">آخرین سبدهای خرید (۵ مورد)</h2>
+
+    <!-- جدول نمایش سبدها فقط اگر لیستی وجود داشته باشد -->
+    <div th:if="${not #lists.isEmpty(userProfile.cartSummaries)}">
+        <table class="carts-table">
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>تاریخ ایجاد</th>
+                <th>وضعیت</th>
+                <th>مبلغ کل</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- حلقه برای نمایش هر ردیف سبد خرید -->
+            <tr th:each="cart, iterStat : ${userProfile.cartSummaries}">
+                <td>
+                    <!-- لینک به صفحه جزئیات سبد (آدرس فرضی /carts/{id}) -->
+                    <a th:href="@{/carts/{id}(id=${cart.id})}"
+                       th:text="${iterStat.count}"
+                       class="cart-details-link"
+                       title="مشاهده جزئیات سبد">
+                        <!-- شماره ردیف -->
+                    </a>
+                </td>
+                <td th:text="${#temporals.format(cart.createdAt, 'yyyy/MM/dd HH:mm')}">۲۱ / ۰۵ / ۱۴۰۳ ۱۱:۳۰</td>
+                <td>
+                    <!-- نمایش وضعیت با استایل متفاوت -->
+                    <span th:text="${cart.status}"
+                          th:classappend="${cart.status == T(com.example.shop3.model.CartStatus).ACTIVE ? 'status-active' :
+                                             (cart.status == T(com.example.shop3.model.CartStatus).ORDERED ? 'status-ordered' :
+                                             (cart.status == T(com.example.shop3.model.CartStatus).ABANDONED ? 'status-abandoned' : ''))}">
+                           فعال
+                       </span>
+                </td>
+                <!-- نمایش قیمت با واحد پولی -->
+                <td th:text="${#numbers.formatDecimal(cart.totalPrice, 0, 'COMMA', 2, 'POINT')} + ' تومان'">۰ تومان</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- نمایش پیام در صورت خالی بودن لیست سبدها -->
+    <div th:if="${#lists.isEmpty(userProfile.cartSummaries)}" class="no-carts">
+        <p>شما هنوز هیچ سبد خریدی ثبت نکرده‌اید.</p>
+    </div>
+
+</div> <!-- .profile-container -->
+
+<!-- نمایش پیام خطا اگر userProfile به هر دلیلی null بود -->
+<div th:unless="${userProfile}" style="text-align: center; margin-top: 50px; color: red;">
+    <p>خطا: اطلاعات پروفایل قابل بارگذاری نیست.</p>
+</div>
+
+<!-- فوتر ساده - بهتر است از th:replace برای فوتر اصلی استفاده کنید -->
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+</body>
+</html>

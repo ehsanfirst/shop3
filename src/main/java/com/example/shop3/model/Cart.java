@@ -8,12 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Enum برای وضعیت سبد خرید (اختیاری ولی توصیه می‌شود)
-enum CartStatus {
-    ACTIVE,    // سبد خرید فعال و در حال استفاده
-    ORDERED,   // سبد خرید به سفارش تبدیل شده
-    ABANDONED  // سبد خرید رها شده (مثلا پس از مدتی عدم فعالیت)
-}
+
 
 @Entity
 @Table(name = "cart") // نام جدول در دیتابیس
