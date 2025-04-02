@@ -8,6 +8,7 @@ import com.example.shop3.model.Role;
 import com.example.shop3.model.User;
 import com.example.shop3.repository.CartRepository;
 import com.example.shop3.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +40,7 @@ public class UserService implements UserDetailsService {
 
     }
 
+    @Transactional
     public void registerUser(UserRequest userRequest, String avatarUrl) throws Exception { // امضا تغییر کرد
         // بررسی تکراری بودن (می‌تواند اینجا یا با Exception Handling از Repository انجام شود)
         if (userRepository.existsByUsername(userRequest.getUsername())) {

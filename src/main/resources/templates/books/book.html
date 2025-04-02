@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- استفاده از نام کتاب در عنوان صفحه -->
+    <title th:text="${book != null ? book.name : 'جزئیات کتاب'}">جزئیات کتاب</title>
+    <!-- استایل های پایه - مشابه صفحات دیگر -->
+    <style>
+        /* ... (استایل های قبلی بدون تغییر) ... */
+
+        body {
+            margin: 0;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- هدر و فوتر ساده --- */
+        .page-header, .page-footer {
+            background-color: #fff; padding: 15px 30px; text-align: center;
+            border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer { margin-top: auto; background-color: #343a40; color: #f8f9fa; padding: 20px; border-top: 1px solid #444; border-bottom: none; box-shadow: none;}
+        .page-footer p { margin: 0; font-size: 0.9em; }
+
+        /* --- کانتینر اصلی جزئیات کتاب --- */
+        .book-details-container {
+            max-width: 900px; /* عرض مناسب برای دو ستون */
+            margin: 40px auto; padding: 30px; background-color: #ffffff;
+            border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* نمایش خطا در صورت عدم وجود کتاب */
+        .error-message {
+            color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb;
+            padding: 15px; border-radius: 5px; text-align: center; font-size: 1.1em;
+        }
+
+        /* --- بخش اصلی اطلاعات کتاب (دو ستونه) --- */
+        .book-main-info {
+            display: flex;
+            gap: 30px; /* فاصله بین عکس و اطلاعات */
+            margin-bottom: 30px; /* فاصله از بخش های بعدی (مثل توضیحات) */
+            flex-wrap: wrap; /* در صفحه کوچک زیر هم بیفتند */
+        }
+
+        /* ستون عکس کاور */
+        .book-cover {
+            flex: 0 0 250px; /* عرض ثابت برای عکس */
+            text-align: center;
+        }
+        .book-cover img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        /* استایل برای کاور پیش‌فرض */
+        .book-cover .default-cover {
+            width: 100%; /* عرض کامل ستون */
+            height: 350px; /* ارتفاع حدودی برای کاور پیش‌فرض */
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+
+
+        /* ستون اطلاعات متنی */
+        .book-meta {
+            flex: 1; /* باقی فضا را بگیرد */
+            min-width: 300px; /* حداقل عرض برای جلوگیری از فشرده شدن زیاد */
+        }
+
+        .book-meta h1 { /* نام کتاب */
+            font-size: 2em;
+            color: #343a40;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* اطلاعات مالک */
+        .owner-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .owner-avatar {
+            width: 35px; height: 35px; border-radius: 50%; object-fit: cover;
+            margin-left: 10px; border: 1px solid #ddd;
+        }
+        .owner-info a { /* لینک نام کاربری مالک */
+            color: #0056b3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .owner-info a:hover { text-decoration: underline; }
+        .owner-info .no-owner { font-style: italic; color: #6c757d; }
+
+        /* قیمت */
+        .price {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #28a745; /* سبز برای قیمت */
+            margin-bottom: 20px;
+        }
+        .price .toman { font-size: 0.6em; vertical-align: middle; }
+
+        /* تگ ها */
+        .tags { margin-bottom: 25px; }
+        .tags-label { font-weight: bold; color: #444; margin-left: 5px;}
+        .tag-link {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 4px 10px;
+            border-radius: 15px; /* گرد */
+            margin: 3px;
+            font-size: 0.85em;
+            text-decoration: none;
+            border: 1px solid #ced4da;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .tag-link:hover { background-color: #ced4da; color: #343a40; }
+        .no-tags { font-style: italic; color: #6c757d; font-size: 0.9em;}
+
+        /* وضعیت موجودی */
+        .availability { margin-bottom: 25px; font-size: 1.1em; }
+        .in-stock { color: #28a745; font-weight: bold; }
+        .out-of-stock { color: #dc3545; font-weight: bold; }
+
+        /* دکمه افزودن به سبد */
+        .add-to-cart-btn {
+            display: inline-block; font-weight: bold; color: #fff; text-align: center;
+            vertical-align: middle; cursor: pointer; user-select: none;
+            background-color: #007bff; /* آبی */ border: 1px solid #007bff;
+            padding: 10px 25px; font-size: 1.1em; line-height: 1.5; border-radius: 5px;
+            transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+        }
+        .add-to-cart-btn:hover { background-color: #0056b3; border-color: #0056b3; }
+        .add-to-cart-btn:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed;}
+
+        /* دکمه ویرایش (اگر مالک، کاربر فعلی بود) */
+        .edit-btn {
+            display: inline-block; font-weight: normal; color: #fff; text-align: center;
+            vertical-align: middle; cursor: pointer; user-select: none;
+            background-color: #ffc107; /* زرد */ border: 1px solid #ffc107;
+            color: #333; /* متن تیره */
+            padding: 5px 12px; font-size: 0.9em; line-height: 1.5; border-radius: 5px;
+            transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+            margin-right: 10px; /* فاصله از دکمه افزودن به سبد */
+            text-decoration: none; /* اگر لینک باشد */
+        }
+        .edit-btn:hover { background-color: #e0a800; border-color: #e0a800; }
+
+        /* کلاس برای نگهداری دکمه‌ها */
+        .actions {
+            margin-top: 25px; /* فاصله از بخش موجودی */
+        }
+
+
+        /* بخش توضیحات (در آینده) */
+        .book-description {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .book-description h2 { font-size: 1.5em; color: #343a40; margin-bottom: 15px; }
+        .book-description p { line-height: 1.7; color: #555; }
+
+    </style>
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+</header>
+
+<div class="book-details-container">
+
+    <!-- نمایش پیام خطا اگر کتاب null بود -->
+    <div th:if="${book == null and errorMessage != null}" class="error-message">
+        <p th:text="${errorMessage}">خطا در بارگذاری اطلاعات کتاب.</p>
+        <p><a th:href="@{/}" style="color: #721c24;">بازگشت به صفحه اصلی</a></p>
+    </div>
+
+    <!-- فقط اگر کتاب وجود داشت، اطلاعات را نمایش بده -->
+    <div th:if="${book != null}">
+        <div class="book-main-info">
+            <!-- ستون کاور کتاب -->
+            <div class="book-cover">
+                <!-- نمایش کاور واقعی اگر وجود داشت -->
+                <img th:if="${book.cover != null and !book.cover.isEmpty()}"
+                     th:src="@{${book.cover}}"
+                     th:alt="${book.name}" />
+                <!-- نمایش کاور پیش فرض اگر وجود نداشت -->
+                <div th:unless="${book.cover != null and !book.cover.isEmpty()}"
+                     class="default-cover">
+                    بدون تصویر
+                </div>
+            </div>
+
+            <!-- ستون اطلاعات کتاب -->
+            <div class="book-meta">
+                <!-- نام کتاب -->
+                <h1 th:text="${book.name}">نام کتاب نمونه</h1>
+
+                <!-- اطلاعات مالک -->
+                <div class="owner-info">
+                    <span th:if="${book.owner != null}">
+                        <!-- آواتار مالک -->
+                         <img th:if="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}"
+                              th:src="@{${book.owner.avatar}}" alt="آواتار مالک" class="owner-avatar"/>
+                         <img th:unless="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}"
+                              th:src="@{/images/avatar/default-avatar.png}" alt="آواتار پیش فرض" class="owner-avatar"/>
+                         <span>ثبت شده توسط: </span>
+                        <!-- لینک به پروفایل مالک (فرضی) -->
+                         <a th:href="@{'/users/' + ${book.owner.username}}" th:text="${book.owner.username}">نام کاربر مالک</a>
+                        <!-- TODO: لینک بالا را به آدرس پروفایل واقعی کاربر تغییر دهید -->
+                    </span>
+                    <span th:unless="${book.owner != null}" class="no-owner">
+                        مالک نامشخص
+                    </span>
+                </div>
+
+                <!-- قیمت کتاب -->
+                <div class="price">
+                    <span th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                    <span class="toman"> تومان</span>
+                </div>
+
+                <!-- تگ ها -->
+                <div class="tags">
+                    <span class="tags-label">تگ ها:</span>
+                    <th:block th:if="${book.tags != null and !book.tags.isEmpty()}">
+                        <!-- لینک به صفحه هر تگ (فرضی) -->
+                        <a th:each="tag : ${book.tags}"
+                           th:href="@{'/tags/' + ${tag.slug}}"
+                           th:text="${tag.name}"
+                           class="tag-link">
+                            نام تگ
+                        </a>
+                        <!-- TODO: لینک بالا را به آدرس صفحه تگ واقعی تغییر دهید -->
+                    </th:block>
+                    <span th:if="${book.tags == null or book.tags.isEmpty()}" class="no-tags">
+                        بدون تگ
+                    </span>
+                </div>
+
+                <!-- وضعیت موجودی -->
+                <div class="availability">
+                     <span th:if="${book.number != null and book.number > 0}" class="in-stock">
+                         موجود در انبار (<span th:text="${book.number}"></span> عدد)
+                     </span>
+                    <span th:if="${book.number == null or book.number <= 0}" class="out-of-stock">
+                         ناموجود
+                     </span>
+                </div>
+
+                <!-- دکمه های اقدام -->
+                <!-- **** شروع بخش اضافه شده **** -->
+                <div class="actions">
+                    <!-- فرم افزودن به سبد -->
+                    <!-- th:action باید به کنترلر سبد خرید شما اشاره کند -->
+                    <form th:action="@{/cart/add}" method="post" style="display: inline;">
+                        <!-- ارسال ID کتاب به صورت مخفی (مطمئن شوید book.id در DTO وجود دارد) -->
+                        <input type="hidden" name="bookId" th:value="${book.id}" />
+                        <!-- ارسال تعداد (پیش فرض ۱) به صورت مخفی -->
+                        <input type="hidden" name="quantity" value="1" />
+                        <button type="submit" class="add-to-cart-btn"
+                                th:disabled="${book.number == null or book.number <= 0}">
+                            <i class="fas fa-cart-plus"></i> <!-- آیکون اختیاری Font Awesome -->
+                            افزودن به سبد خرید
+                        </button>
+                    </form>
+
+                    <!-- دکمه ویرایش (فقط اگر کاربر لاگین کرده مالک کتاب باشد) -->
+                    <!-- نیاز به Spring Security taglib -->
+                    <!--
+                    <a xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+                       sec:authorize="isAuthenticated()"
+                       th:if="${book.owner != null and #authentication.principal instanceof T(com.example.shop3.config.SecurityUserDetails) and #authentication.principal.userEntity.id == book.owner.id}"
+                       th:href="@{'/books/' + ${book.id} + '/edit'}"
+                       class="edit-btn">
+                       ویرایش کتاب
+                    </a>
+                    -->
+                </div>
+                <!-- **** پایان بخش اضافه شده **** -->
+
+            </div> <!-- .book-meta -->
+        </div> <!-- .book-main-info -->
+
+        <!-- بخش توضیحات (اختیاری) -->
+        <!-- ... -->
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a th:href="@{/}" style="color: #007bff; text-decoration: none;">← بازگشت به فروشگاه</a>
+        </div>
+
+    </div> <!-- th:if book != null -->
+
+</div><!-- .book-details-container -->
+
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+<!-- (اختیاری) اگر از آیکون Font Awesome استفاده می‌کنید -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script> -->
+
+</body>
+</html>

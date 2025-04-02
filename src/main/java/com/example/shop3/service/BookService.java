@@ -1,6 +1,7 @@
 package com.example.shop3.service;
 
-import com.example.shop3.dto.AddBookDTO;
+import com.example.shop3.dto.*;
+import com.example.shop3.exception.BookNotFoundException;
 import com.example.shop3.model.Book;
 import com.example.shop3.model.Tag; // اضافه شد
 import com.example.shop3.model.User; // اضافه شد
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // *** مهم ***
 
 import java.util.List; // اضافه شد
+import java.util.Optional;
 import java.util.Set; // اضافه شد
 import java.util.stream.Collectors; // اضافه شد
 
@@ -86,5 +88,26 @@ public class BookService {
         }
     }
 
-    // (ممکن است متدهای دیگری مثل getBookById, getAllBooks و ... هم اینجا اضافه شوند)
+    @Transactional(readOnly = true)
+    public BookResponse getBookById(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("book.not.found.by.id: ",id));
+
+        Set<TagDTO> tagDTOs = book.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getSlug())) // مپ کردن هر Tag به TagDTO
+                .collect(Collectors.toSet());
+
+        User user = book.getOwner();
+        OwnerDTO owner = OwnerDTO.builder().username(user.getUsername()).email(user.getEmail()).avatar(user.getAvatar()).build();
+
+        return BookResponse.builder()
+                .id(book.getId())
+                .name(book.getName())
+                .owner(owner)
+                .cover(book.getAvatar())
+                .number(book.getNumber())
+                .tags(tagDTOs)
+                .price(book.getPrice())
+                .build();
+    }
 }
