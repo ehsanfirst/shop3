@@ -25,9 +25,8 @@ public class BaseConfiguration {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(req ->
                         req.
-                                requestMatchers("/", "/register", "/login", "/avatars/**").permitAll()
+                                requestMatchers("/", "/register", "/login", "/avatars/**","/covers/**").permitAll()
                                 .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
-
                                 .anyRequest().authenticated()
                 )
                 //  .httpBasic(Customizer.withDefaults())

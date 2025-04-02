@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزودن کتاب جدید</title>
+    <!-- استایل های پایه - مشابه فرم ثبت نام -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- هدر و فوتر ساده --- */
+        .page-header, .page-footer {
+            background-color: #fff; padding: 15px 30px; text-align: center;
+            border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer { margin-top: auto; background-color: #343a40; color: #f8f9fa; padding: 20px; border-top: 1px solid #444; border-bottom: none; box-shadow: none;}
+        .page-footer p { margin: 0; font-size: 0.9em; }
+
+        /* --- استایل فرم --- */
+        .form-container {
+            max-width: 600px; /* کمی عریض تر برای تگ ها */
+            margin: 40px auto; padding: 30px; background-color: #ffffff;
+            border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        .form-container h2 { text-align: center; color: #343a40; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+
+        .form-control, .form-control-file {
+            width: 100%; padding: 12px 15px; font-size: 1em;
+            border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #80bdff; outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .form-control-file { padding: 8px; }
+
+        /* --- استایل برای نمایش خطاها --- */
+        .error-message { color: #dc3545; font-size: 0.85em; margin-top: 5px; }
+        .alert-danger { /* خطاهای کلی */
+            background-color: #f8d7da; border-color: #f5c6cb; color: #721c24;
+            padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; border: 1px solid transparent;
+        }
+        .alert-danger p { margin: 0; }
+        .is-invalid { border-color: #dc3545 !important; } /* هایلایت فیلد دارای خطا */
+
+        /* --- استایل دکمه --- */
+        .btn {
+            display: inline-block; font-weight: 400; color: #fff; text-align: center;
+            vertical-align: middle; cursor: pointer; user-select: none;
+            background-color: #28a745; /* سبز برای افزودن */ border: 1px solid #28a745;
+            padding: 12px 25px; font-size: 1.1em; line-height: 1.5; border-radius: 5px;
+            transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            width: 100%;
+        }
+        .btn:hover { background-color: #218838; border-color: #1e7e34; }
+
+        /* --- استایل بخش تگ ها --- */
+        .tags-container {
+            border: 1px solid #ced4da; border-radius: 5px; padding: 15px;
+            max-height: 150px; /* ارتفاع محدود با اسکرول */ overflow-y: auto;
+            margin-top: 5px;
+        }
+        .tag-checkbox { margin-bottom: 8px; display: block; /* هر چک باکس در یک خط */ }
+        .tag-checkbox input[type="checkbox"] { margin-left: 8px; vertical-align: middle; }
+        .tag-checkbox label { display: inline; font-weight: normal; vertical-align: middle; }
+
+    </style>
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+</header>
+
+<div class="form-container">
+    <h2>افزودن کتاب جدید</h2>
+
+    <!-- نمایش خطاهای کلی -->
+    <div th:if="${globalError}" class="alert alert-danger">
+        <p th:text="${globalError}"></p>
+    </div>
+
+    <form th:action="@{/books/new}" method="post" th:object="${book}" enctype="multipart/form-data" novalidate>
+
+        <!-- فیلد نام کتاب -->
+        <div class="form-group">
+            <label for="name">نام کتاب:</label>
+            <input type="text" id="name" class="form-control" th:field="*{name}"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" required/>
+            <div th:if="${#fields.hasErrors('name')}" class="error-message">
+                <p th:errors="*{name}"></p>
+            </div>
+        </div>
+
+        <!-- فیلد تعداد موجودی -->
+        <div class="form-group">
+            <label for="availableNum">تعداد موجودی:</label> <!-- label for هم اصلاح شد -->
+            <input type="number" id="availableNum" class="form-control" th:field="*{availableNum}"
+                   th:classappend="${#fields.hasErrors('availableNum')} ? 'is-invalid'" required/> <!-- *** hasErrors اصلاح شد *** -->
+
+            <!-- نمایش خطای مربوط به تعداد -->
+            <div th:if="${#fields.hasErrors('availableNum')}" class="error-message"> <!-- *** th:if اصلاح شد *** -->
+                <p th:errors="*{availableNum}"></p> <!-- *** th:errors اصلاح شد *** -->
+            </div>
+        </div>
+
+        <!-- فیلد قیمت -->
+        <div class="form-group">
+            <label for="price">قیمت (تومان):</label>
+            <input type="number" id="price" class="form-control" th:field="*{price}" step="0.01"
+                   th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'" required/>
+            <div th:if="${#fields.hasErrors('price')}" class="error-message">
+                <p th:errors="*{price}"></p>
+            </div>
+        </div>
+
+        <!-- فیلد آپلود کاور کتاب -->
+        <div class="form-group">
+            <label for="coverFile">کاور کتاب (اختیاری - فقط عکس):</label>
+            <input type="file" id="coverFile" name="coverFile" class="form-control-file"
+                   accept="image/jpeg, image/png, image/gif" />
+            <div th:if="${fileError}" class="error-message">
+                <p th:text="${fileError}"></p>
+            </div>
+        </div>
+
+        <!-- بخش انتخاب تگ ها -->
+        <div class="form-group">
+            <label>تگ ها (اختیاری):</label>
+            <div class="tags-container">
+                <div th:if="${allTags != null and not #lists.isEmpty(allTags)}">
+                    <div th:each="tag : ${allTags}" class="tag-checkbox">
+                        <input type="checkbox"
+                               th:field="*{tagIds}"
+                               th:value="${tag.id}"
+                               th:id="'tag-' + ${tag.id}" />
+                        <label th:for="'tag-' + ${tag.id}" th:text="${tag.name}">نام تگ</label>
+                    </div>
+                </div>
+                <div th:if="${allTags == null or #lists.isEmpty(allTags)}">
+                    <p style="color: #6c757d; font-style: italic; margin:0;">هیچ تگی برای انتخاب یافت نشد.</p>
+                </div>
+            </div>
+            <div th:if="${#fields.hasErrors('tagIds')}" class="error-message">
+                <p th:errors="*{tagIds}"></p>
+            </div>
+        </div>
+
+        <!-- دکمه ثبت -->
+        <div class="form-group">
+            <button type="submit" class="btn">افزودن کتاب</button>
+        </div>
+
+    </form> <!-- پایان فرم -->
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a th:href="@{/}">بازگشت به صفحه اصلی</a>
+    </div>
+
+</div><!-- .form-container -->
+
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+</body>
+</html>
