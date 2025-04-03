@@ -7,6 +7,7 @@ import com.example.shop3.repository.BookRepository;
 import com.example.shop3.repository.CartRepository;
 import com.example.shop3.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest; // Import PageRequest
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort; // Import Sort
@@ -38,10 +39,10 @@ public class ProfileService {
         Pageable topFive = PageRequest.of(0, 5, Sort.by("createdAt").descending());
 
         // --- ۳. گرفتن ۵ سبد آخر با جزئیات کامل با *یک* کوئری ---
-        List<Cart> carts = cartRepository.findCartsWithDetailsByUserId(userId, topFive);
+        Page<Cart> carts = cartRepository.findCartsWithDetailsByUserId(userId, topFive);
 
         // --- ۴. تبدیل Cart ها به CartSummaryDTO و محاسبه قیمت کل در جاوا ---
-        List<CartSummaryDTO> cartSummaries = carts.stream() // روی لیست سبدها پیمایش کن
+        List<CartSummaryDTO> cartSummaries = carts.getContent().stream() // روی لیست سبدها پیمایش کن
                 .map(cart -> { // هر سبد رو به یک CartSummaryDTO تبدیل کن
                     // محاسبه قیمت کل برای این سبد خاص
                     BigDecimal totalPrice = cart.getItems().stream() // روی آیتم های این سبد پیمایش کن
@@ -60,7 +61,7 @@ public class ProfileService {
                             .totalPrice(totalPrice) // قیمت محاسبه شده در اینجا قرار میگیره
                             .build();
                 })
-                .collect(Collectors.toList()); // نتایج رو در یک لیست جمع کن
+                .collect(Collectors.toList());
 
         // --- ۵. شمارش تعداد کتاب های کاربر با کوئری بهینه ---
         int bookCount = bookRepository.countByOwnerId(userId); // فراخوانی متد جدید در BookRepository

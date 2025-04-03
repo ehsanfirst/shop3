@@ -1,10 +1,8 @@
 package com.example.shop3.dto;
 
-import com.example.shop3.model.Cart;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
 
 @Getter

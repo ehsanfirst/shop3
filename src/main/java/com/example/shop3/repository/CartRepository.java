@@ -1,45 +1,26 @@
 package com.example.shop3.repository;
 
-import com.example.shop3.dto.CartSummaryDTO;
 import com.example.shop3.model.Cart;
+import com.example.shop3.model.CartStatus;
+import org.springframework.data.domain.Page; // <-- Import Page
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface CartRepository extends JpaRepository<Cart,Long> {
+public interface CartRepository extends JpaRepository<Cart, Long> {
 
-//     @Query("SELECT new com.example.shop3.dto.CartSummaryDTO(c.id, c.createdAt, c.status, " +
-//             // Cast کردن کل نتیجه COALESCE به BigDecimal
-//             " CAST( COALESCE(SUM( CAST(i.quantity AS java.math.BigDecimal) * b.price ), 0.0) AS java.math.BigDecimal) )" +
-//             "FROM Cart c LEFT JOIN c.items i LEFT JOIN i.book b " +
-//             "WHERE c.user.id = :userId " +
-//             "GROUP BY c.id, c.createdAt, c.status " +
-//             "ORDER BY c.createdAt DESC")
-//     List<CartSummaryDTO> findCartSummariesByUserId(@Param("userId") Long userId, Pageable pageable);
+    // کوئری برای گرفتن Cart ها به همراه جزئیات برای یک صفحه خاص
+    @Query(value = "SELECT DISTINCT c FROM Cart c LEFT JOIN FETCH c.items i LEFT JOIN FETCH i.book b WHERE c.user.id = :userId ORDER BY c.createdAt DESC", // اضافه کردن ORDER BY برای سازگاری با Pageable
+            countQuery = "SELECT count(c) FROM Cart c WHERE c.user.id = :userId") // کوئری جداگانه برای شمارش کل
+    Page<Cart> findCartsWithDetailsByUserId(@Param("userId") Long userId, Pageable pageable); // <-- تغییر خروجی به Page<Cart>
 
-//     // کوئری جدید برای واکشی Cart ها به همراه Item و Book با یک کوئری
-//     // DISTINCT برای جلوگیری از کارتیزی شدن نتیجه بخاطر join ها
-//     @Query("SELECT DISTINCT c FROM Cart c LEFT JOIN FETCH c.items i LEFT JOIN FETCH i.book b WHERE c.user.id = :userId")
-//     List<Cart> findCartsWithDetailsByUserId(@Param("userId") Long userId, Pageable pageable); // Pageable همچنان برای محدودیت 5 تا
+    // متد countQuery در کوئری بالا کار شمارش را انجام می‌دهد.
+    // نیازی به متد countByUserId جداگانه نیست، مگر اینکه از countQuery استفاده نکنید.
+    // long countByUserId(Long userId);
 
-//     @Query("SELECT new com.example.shop3.dto.CartSummaryDTO(c.id, c.createdAt, c.status, " +
-//             // Cast کردن کل نتیجه SUM (و COALESCE)
-//             " CAST( COALESCE(SUM( CAST(i.quantity AS java.math.BigDecimal) * b.price ), 0.0) AS java.math.BigDecimal) )" +
-//             "FROM Cart c LEFT JOIN c.items i LEFT JOIN i.book b " +
-//             "WHERE c.user.id = :userId " +
-//             "GROUP BY c.id, c.createdAt, c.status " +
-//             "ORDER BY c.createdAt DESC")
-//     List<CartSummaryDTO> findCartSummariesByUserId(@Param("userId") Long userId, Pageable pageable);
-
-
-
-    // کوئری جدید برای گرفتن Cart ها به همراه Item ها و Book های داخل Item ها
-    // با یک دستور بهینه
-    @Query("SELECT DISTINCT c FROM Cart c LEFT JOIN FETCH c.items i LEFT JOIN FETCH i.book b WHERE c.user.id = :userId")
-    List<Cart> findCartsWithDetailsByUserId(@Param("userId") Long userId, Pageable pageable);
-    // Pageable همچنان برای محدودیت 5 تا و مرتب سازی استفاده می شود
+    Optional<Cart> findCartByStatusAndUser_Id(CartStatus status, Long userId);
 }
-

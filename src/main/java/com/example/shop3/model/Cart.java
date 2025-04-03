@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 // از نمایش/مقایسه user و items در toString و equals/hashCode صرف نظر می‌کنیم
 @ToString(exclude = {"user", "items"})
 @EqualsAndHashCode(exclude = {"user", "items"})

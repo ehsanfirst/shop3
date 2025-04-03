@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبد خرید شما</title>
+    <!-- استایل های پایه - ترکیبی از استایل‌های قبلی -->
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- هدر و فوتر (مشابه صفحات دیگر) --- */
+        .page-header, .page-footer {
+            background-color: #fff; padding: 15px 30px; text-align: center;
+            border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer { margin-top: auto; background-color: #343a40; color: #f8f9fa; padding: 20px; border-top: 1px solid #444; border-bottom: none; box-shadow: none;}
+        .page-footer p { margin: 0; font-size: 0.9em; }
+
+        /* --- کانتینر اصلی --- */
+        .container {
+            max-width: 1100px; /* کمی عریض‌تر برای نمایش بهتر جدول */
+            margin: 30px auto; padding: 25px; background-color: #fff;
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* --- عنوان بخش --- */
+        .section-title {
+            font-size: 1.6em; color: #343a40; margin-bottom: 20px;
+            border-bottom: 2px solid #ffc107; display: inline-block; padding-bottom: 5px;
+        }
+
+        /* --- استایل جدول سبد خرید --- */
+        .cart-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .cart-table th, .cart-table td {
+            border: 1px solid #ddd; padding: 12px 15px; text-align: right; vertical-align: middle;
+        }
+        .cart-table th { background-color: #e9ecef; font-weight: bold; font-size: 0.9em; text-transform: uppercase; }
+        .cart-table tbody tr:nth-child(odd) { background-color: #fdfdfd; }
+        .cart-table tbody tr:hover { background-color: #f1f1f1; }
+
+        /* استایل ستون "محصول" */
+        .product-column { display: flex; align-items: center; }
+        .item-thumbnail {
+            width: 60px; height: 80px; /* اندازه مناسب برای تصویر کوچک */
+            object-fit: cover; /* حفظ نسبت تصویر */
+            margin-left: 15px; /* فاصله عکس از متن */
+            border-radius: 3px; border: 1px solid #eee;
+        }
+        .item-thumbnail.default { background-color: #eee; display: flex; align-items: center; justify-content: center; font-size:0.7em; color: #aaa;}
+
+        .item-details .item-name { font-weight: bold; color: #333; display: block; margin-bottom: 3px; text-decoration: none;}
+        .item-details .item-name:hover { color: #0056b3; }
+        .item-details .item-meta { font-size: 0.85em; color: #6c757d; } /* برای اطلاعات اضافی مثل نویسنده */
+
+        /* استایل ستون "تعداد" (آماده برای input در آینده) */
+        .quantity-column input[type="number"] { width: 60px; padding: 5px 8px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        .quantity-column .update-link { font-size: 0.8em; margin-top: 5px; display: block; } /* لینک بروزرسانی */
+
+        /* استایل ستون "قیمت" و "مجموع" */
+        .price-column, .total-column { font-weight: bold; white-space: nowrap; /* جلوگیری از شکستن خط قیمت */ }
+
+        /* استایل ستون "حذف" */
+        .actions-column form { display: inline; }
+        .remove-btn {
+            background: none; border: none; color: #dc3545; /* قرمز برای حذف */
+            cursor: pointer; padding: 5px; font-size: 1.2em; /* کمی بزرگتر برای آیکون */
+            vertical-align: middle;
+        }
+        .remove-btn:hover { color: #a71d2a; }
+        /* می‌توانید از آیکون سطل زباله FontAwesome استفاده کنید: <i class="fas fa-trash-alt"></i> */
+
+        /* --- بخش خلاصه و پرداخت --- */
+        .cart-summary {
+            margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; /* برای ریسپانسیو */
+        }
+        .total-price-section h3 { margin: 0; font-size: 1.4em; color: #343a40; }
+        .total-price-section .price-value { color: #28a745; font-weight: bold; } /* سبز برای قیمت */
+        .total-price-section .price-currency { font-size: 0.7em; }
+
+        .checkout-btn {
+            padding: 12px 35px; font-size: 1.1em; font-weight: bold;
+            background-color: #28a745; /* سبز برای پرداخت */ border-color: #28a745; color: white;
+            border-radius: 5px; text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .checkout-btn:hover { background-color: #218838; border-color: #1e7e34; }
+        /* دکمه غیرفعال اگر سبد خالی باشد (هرچند صفحه خالی نمایش داده نمیشه ولی برای اطمینان) */
+        .checkout-btn:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed; }
+
+
+        /* --- پیام سبد خالی --- */
+        .empty-cart-message {
+            text-align: center; padding: 40px 20px; margin-top: 20px;
+            border: 1px dashed #ced4da; border-radius: 5px; background-color: #f8f9fa;
+        }
+        .empty-cart-message p { font-size: 1.2em; color: #6c757d; margin-bottom: 20px; }
+        .empty-cart-message .back-to-shop-btn {
+            padding: 10px 25px; background-color: #007bff; color: white;
+            text-decoration: none; border-radius: 5px; transition: background-color 0.2s;
+        }
+        .empty-cart-message .back-to-shop-btn:hover { background-color: #0056b3; }
+
+        /* کمی ریسپانسیو سازی برای جدول */
+        @media (max-width: 768px) {
+            .cart-table thead { display: none; /* مخفی کردن سربرگ جدول در موبایل */ }
+            .cart-table tbody tr { display: block; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px; padding: 10px; }
+            .cart-table tbody td { display: block; text-align: left; /* چپ چین کردن محتوا */ border: none; padding: 8px 0; position: relative; padding-right: 50%; /* فضا برای لیبل */ }
+            /* افزودن لیبل ستون‌ها قبل از محتوای سلول */
+            .cart-table td::before {
+                content: attr(data-label); /* خواندن لیبل از data-label */
+                position: absolute; top: 8px; right: 10px; /* موقعیت لیبل */
+                width: 45%; /* عرض لیبل */
+                padding-left: 10px; white-space: nowrap; font-weight: bold; text-align: right;
+            }
+            .product-column { flex-direction: column; align-items: flex-start;} /* عکس و متن زیر هم */
+            .item-thumbnail { margin-left: 0; margin-bottom: 10px; }
+            .cart-summary { justify-content: center; text-align: center; }
+            .total-price-section { margin-bottom: 15px; width: 100%; }
+        }
+
+    </style>
+    <!-- Font (Optional) -->
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+    <!-- Font Awesome for Icons (Optional) -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> -->
+</head>
+<body>
+
+<!-- هدر صفحه -->
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+</header>
+
+<!-- محتوای اصلی -->
+<div class="container">
+    <h2 class="section-title">سبد خرید شما</h2>
+
+    <!-- نمایش محتوای سبد فقط اگر خالی نباشد -->
+    <div th:if="${cart != null and not #lists.isEmpty(cart.items)}">
+        <table class="cart-table">
+            <thead>
+            <tr>
+                <th style="width: 45%;">محصول</th>
+                <th style="width: 15%;" class="text-center">قیمت واحد</th>
+                <th style="width: 10%;" class="text-center">تعداد</th>
+                <th style="width: 15%;" class="text-center">مجموع</th>
+                <th style="width: 15%;">حذف</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- حلقه روی آیتم‌های سبد خرید -->
+            <tr th:each="item : ${cart.items}">
+                <!-- ستون محصول (عکس و نام) -->
+                <td data-label="محصول:">
+                    <div class="product-column">
+                        <!-- نمایش عکس کاور -->
+                        <img th:if="${item.book.avatar != null and !item.book.avatar.isEmpty()}"
+                             th:src="@{${item.book.avatar}}" th:alt="${item.book.name}" class="item-thumbnail"/>
+                        <!-- نمایش جایگزین عکس -->
+                        <div th:unless="${item.book.avatar != null and !item.book.avatar.isEmpty()}"
+                             class="item-thumbnail default">بدون تصویر</div>
+                        <!-- نام و جزئیات کتاب -->
+                        <div class="item-details">
+                            <!-- لینک به صفحه خود کتاب -->
+                            <a th:href="@{/books/{id}(id=${item.book.id})}" th:text="${item.book.name}" class="item-name">نام کتاب</a>
+                            <!-- اینجا می‌توانید اطلاعات دیگری مثل نویسنده را هم اضافه کنید -->
+                            <!-- <span class="item-meta" th:text="${item.book.authorName}">نام نویسنده</span> -->
+                        </div>
+                    </div>
+                </td>
+                <!-- ستون قیمت واحد -->
+                <td data-label="قیمت واحد:" class="price-column text-center">
+                    <span th:text="${#numbers.formatDecimal(item.book.price, 0, 'COMMA', 0, 'POINT')}"></span> <span style="font-size:0.8em">تومان</span>
+                </td>
+                <!-- ستون تعداد -->
+                <td data-label="تعداد:" class="quantity-column text-center">
+                    <!-- نمایش تعداد فعلی - در آینده می‌توانید به input تبدیل کنید -->
+                    <span th:text="${item.quantity}">1</span>
+                    <!-- مثال لینک آپدیت (نیاز به پیاده سازی در کنترلر دارد) -->
+                    <!-- <a href="#" class="update-link">بروزرسانی</a> -->
+                </td>
+                <!-- ستون مجموع قیمت آیتم -->
+                <td data-label="مجموع:" class="total-column text-center">
+                    <span th:text="${#numbers.formatDecimal(item.book.price * item.quantity, 0, 'COMMA', 0, 'POINT')}"></span> <span style="font-size:0.8em">تومان</span>
+                </td>
+                <!-- ستون حذف آیتم -->
+                <td data-label="حذف:" class="actions-column">
+                    <!-- فرم کوچک برای ارسال درخواست حذف -->
+                    <form th:action="@{/cart/remove}" method="post" onsubmit="return confirm('آیا از حذف این آیتم مطمئن هستید؟');">
+                        <!-- ارسال ID آیتم برای حذف -->
+                        <input type="hidden" name="itemId" th:value="${item.id}" />
+                        <button type="submit" class="remove-btn" title="حذف آیتم">
+                            حذف <!-- یا آیکون: <i class="fas fa-trash-alt"></i> -->
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- بخش خلاصه و دکمه پرداخت -->
+        <div class="cart-summary">
+            <div class="total-price-section">
+                <h3>مبلغ کل قابل پرداخت:
+                    <span class="price-value" th:text="${#numbers.formatDecimal(cart.price, 0, 'COMMA', 0, 'POINT')}">۰</span>
+                    <span class="price-currency">تومان</span>
+                </h3>
+            </div>
+            <div class="checkout-section">
+                <!-- لینک به صفحه پرداخت (کنترلر @{/checkout} باید پیاده سازی شود) -->
+                <a th:href="@{/checkout}" class="checkout-btn">
+                    ادامه فرآیند خرید و پرداخت
+                </a>
+                <!-- اگر سبد خالی بود دکمه غیرفعال می‌شود (هرچند کل این بخش نمایش داده نمی‌شود) -->
+                <!-- <button type="button" class="checkout-btn" th:disabled="${#lists.isEmpty(cart.items)}">...</button> -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- نمایش پیام در صورت خالی بودن سبد -->
+    <div th:if="${cart == null or #lists.isEmpty(cart.items)}" class="empty-cart-message">
+        <p>سبد خرید شما در حال حاضر خالی است.</p>
+        <a th:href="@{/}" class="back-to-shop-btn">بازگشت به فروشگاه</a>
+    </div>
+
+</div> <!-- /container -->
+
+<!-- فوتر صفحه -->
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+</body>
+</html>

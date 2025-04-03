@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تاریخچه سبدهای خرید</title>
+    <!-- استایل های پایه - مشابه profile.html و با اضافه کردن استایل صفحه‌بندی -->
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه شما */
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- هدر و فوتر (مشابه صفحات دیگر) --- */
+        .page-header, .page-footer {
+            background-color: #fff;
+            padding: 15px 30px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer {
+            margin-top: auto; /* فوتر را به پایین می‌چسباند */
+            background-color: #343a40;
+            color: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #444;
+            border-bottom: none; /* فوتر نباید خط پایین داشته باشد */
+            box-shadow: none; /* فوتر نیازی به سایه ندارد */
+        }
+        .page-footer p { margin: 0; font-size: 0.9em; }
+
+        /* --- کانتینر اصلی --- */
+        .container {
+            max-width: 1000px; /* کمی عریض‌تر برای جدول */
+            margin: 30px auto;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* --- عنوان بخش --- */
+        .section-title {
+            font-size: 1.6em;
+            color: #343a40;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ffc107; /* خط زرد زیر عنوان */
+            display: inline-block; /* تا border فقط زیر متن بیفتد */
+        }
+
+        /* --- استایل جدول --- */
+        .carts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .carts-table th, .carts-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: right;
+            vertical-align: middle;
+            font-size: 0.95em; /* کمی کوچکتر کردن فونت جدول */
+        }
+        .carts-table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .carts-table tbody tr:nth-child(odd) {
+            background-color: #f8f9fa; /* یکی در میان رنگی */
+        }
+        .carts-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* --- پیام "موردی یافت نشد" --- */
+        .no-items-message {
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 20px;
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px dashed #ced4da;
+            border-radius: 5px;
+        }
+
+        /* --- استایل لینک جزئیات سبد (اختیاری) --- */
+        .cart-details-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .cart-details-link:hover {
+            text-decoration: underline;
+        }
+
+        /* --- استایل وضعیت‌ها (مشابه profile.html) --- */
+        .status-active { color: green; font-weight: bold; }
+        .status-ordered { color: blue; }
+        .status-abandoned { color: gray; }
+
+        /* --- استایل‌های صفحه‌بندی (Bootstrap-like) --- */
+        .pagination-nav {
+            margin-top: 25px; /* فاصله از جدول */
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding-left: 0;
+            list-style: none;
+            border-radius: .25rem;
+        }
+        .page-item .page-link {
+            position: relative;
+            display: block;
+            padding: .5rem .75rem;
+            margin-right: -1px; /* چسبیدن لینک ها به هم در حالت LTR، در RTL برعکس */
+            line-height: 1.25;
+            color: #007bff;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            text-decoration: none; /* حذف خط زیر لینک */
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+        }
+        .page-item.active .page-link {
+            z-index: 3; /* بالاتر از بقیه */
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            cursor: auto;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        /* گوشه‌های گرد برای اولین و آخرین آیتم */
+        .page-item:first-child .page-link {
+            margin-right: 0; /* حذف مارجین منفی برای اولین آیتم در RTL */
+            border-top-right-radius: .25rem;
+            border-bottom-right-radius: .25rem;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .page-item:last-child .page-link {
+            border-top-left-radius: .25rem;
+            border-bottom-left-radius: .25rem;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .page-link:hover {
+            color: #0056b3;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        /* برای نمایش اطلاعات صفحه‌بندی */
+        .pagination-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+    </style>
+    <!-- Font (Optional) -->
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<!-- هدر صفحه -->
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+    <!-- می‌توانید لینک‌های دیگری مثل پروفایل یا خروج را هم اینجا اضافه کنید -->
+</header>
+
+<!-- محتوای اصلی -->
+<div class="container">
+    <h2 class="section-title">تاریخچه سبدهای خرید</h2>
+
+    <!-- بررسی وجود محتوا در صفحه فعلی -->
+    <div th:if="${cartPage != null and cartPage.hasContent()}">
+        <table class="carts-table">
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>تاریخ ایجاد</th>
+                <th>وضعیت</th>
+                <th>مبلغ کل (تومان)</th>
+                <th>عملیات</th> <!-- ستون جدید برای لینک جزئیات -->
+            </tr>
+            </thead>
+            <tbody>
+            <!-- حلقه روی سبدهای صفحه فعلی -->
+            <tr th:each="cart, iterStat : ${cartPage.content}">
+                <!-- محاسبه شماره ردیف کلی -->
+                <td th:text="${(cartPage.number * cartPage.size) + iterStat.count}">1</td>
+                <!-- نمایش تاریخ فرمت شده -->
+                <td th:text="${#temporals.format(cart.createdAt, 'yyyy/MM/dd HH:mm')}">۱۴۰۳/۰۵/۲۲ ۱۳:۴۵</td>
+                <!-- نمایش وضعیت با استایل مربوطه -->
+                <td>
+                    <span th:text="${cart.status}"
+                          th:classappend="${cart.status == T(com.example.shop3.model.CartStatus).ACTIVE ? 'status-active' :
+                                             (cart.status == T(com.example.shop3.model.CartStatus).ORDERED ? 'status-ordered' :
+                                             (cart.status == T(com.example.shop3.model.CartStatus).ABANDONED ? 'status-abandoned' : ''))}">
+                        فعال
+                    </span>
+                </td>
+                <!-- نمایش قیمت فرمت شده -->
+                <td th:text="${#numbers.formatDecimal(cart.totalPrice, 0, 'COMMA', 0, 'POINT')}">۱۵۰,۰۰۰</td>
+                <!-- لینک مشاهده جزئیات سبد -->
+                <td>
+                    <a th:href="@{/cart/{id}(id=${cart.id})}" class="cart-details-link" title="مشاهده جزئیات">
+                        جزئیات
+                        <!-- یا می‌توانید از آیکون استفاده کنید -->
+                        <!-- <i class="fas fa-eye"></i> -->
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- بخش ناوبری صفحه‌بندی -->
+        <!-- فقط اگر بیشتر از یک صفحه وجود داشته باشد -->
+        <nav aria-label="Cart navigation" th:if="${cartPage.totalPages > 1}" class="pagination-nav">
+            <ul class="pagination">
+                <!-- دکمه صفحه قبل -->
+                <li class="page-item" th:classappend="${!cartPage.hasPrevious()} ? 'disabled'">
+                    <a class="page-link" th:href="@{/cart/all(page=${cartPage.number - 1}, size=${cartPage.size})}" aria-label="قبلی">
+                        <span aria-hidden="true">«</span>
+                    </a>
+                </li>
+
+                <!-- تولید لینک‌های شماره صفحات -->
+                <!-- (این بخش می‌تواند پیچیده باشد، یک نمونه ساده‌تر) -->
+                <!-- نمایش صفحات نزدیک به صفحه فعلی + اول و آخر -->
+                <th:block th:each="pageNumber : ${#numbers.sequence(0, cartPage.totalPages - 1)}">
+                    <!-- نمایش ... اگر فاصله زیاد است (مثلا بیش از ۱ صفحه بین لینک‌ها) -->
+                    <li class="page-item disabled" th:if="${pageNumber == 1 and cartPage.number > 2}">
+                        <span class="page-link">...</span>
+                    </li>
+
+                    <!-- نمایش شماره صفحه (اول، آخر، یا نزدیک به فعلی) -->
+                    <li class="page-item"
+                        th:if="${pageNumber == 0 or pageNumber == cartPage.totalPages - 1 or (pageNumber >= cartPage.number - 1 and pageNumber <= cartPage.number + 1)}"
+                        th:classappend="${pageNumber == cartPage.number} ? 'active'">
+                        <!-- لینک فقط اگر صفحه فعلی نباشد -->
+                        <a class="page-link" th:if="${pageNumber != cartPage.number}"
+                           th:href="@{/cart/all(page=${pageNumber}, size=${cartPage.size})}"
+                           th:text="${pageNumber + 1}">
+                        </a>
+                        <!-- نمایش شماره بدون لینک اگر صفحه فعلی باشد -->
+                        <span class="page-link" th:if="${pageNumber == cartPage.number}"
+                              th:text="${pageNumber + 1}">
+                         </span>
+                    </li>
+
+                    <!-- نمایش ... اگر فاصله زیاد است -->
+                    <li class="page-item disabled" th:if="${pageNumber == cartPage.totalPages - 2 and cartPage.number < cartPage.totalPages - 3}">
+                        <span class="page-link">...</span>
+                    </li>
+                </th:block>
+
+                <!-- دکمه صفحه بعد -->
+                <li class="page-item" th:classappend="${!cartPage.hasNext()} ? 'disabled'">
+                    <a class="page-link" th:href="@{/cart/all(page=${cartPage.number + 1}, size=${cartPage.size})}" aria-label="بعدی">
+                        <span aria-hidden="true">»</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- نمایش اطلاعات کلی صفحه‌بندی -->
+        <div class="pagination-info">
+            نمایش <span th:text="${cartPage.numberOfElements}"></span> مورد از <span th:text="${cartPage.totalElements}"></span> مورد | صفحه <span th:text="${cartPage.number + 1}"></span> از <span th:text="${cartPage.totalPages}"></span>
+        </div>
+
+    </div>
+
+    <!-- پیام در صورت خالی بودن کل نتایج -->
+    <div th:if="${cartPage == null or cartPage.totalElements == 0}" class="no-items-message">
+        <p>شما هیچ سبد خریدی در تاریخچه خود ندارید.</p>
+    </div>
+
+</div> <!-- /container -->
+
+<!-- فوتر صفحه -->
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+
+<!-- (Optional) Font Awesome for icons if needed -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script> -->
+
+</body>
+</html>
