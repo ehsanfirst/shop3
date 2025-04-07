@@ -11,6 +11,8 @@ import com.example.shop3.repository.UserRepository; // اضافه شد (اگر o
 import lombok.RequiredArgsConstructor;
 // import org.springframework.security.core.context.SecurityContextHolder; // راه دیگر گرفتن کاربر
 // import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // *** مهم ***
 
@@ -110,4 +112,29 @@ public class BookService {
                 .price(book.getPrice())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public Page<BookDTO> getBooksByTagSlug(String  slug, Pageable pageable) {
+     Page<Book> books = bookRepository.findBooksByTagSlug(slug, pageable);
+     return books.map(this::convertBookToBookDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BookDTO> getNewestBooks(Pageable pageable) {
+        Page<Book> books = bookRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return books.map(this::convertBookToBookDTO);
+    }
+
+    private BookDTO convertBookToBookDTO(Book book) {
+        return BookDTO.builder()
+                .id(book.getId())
+                .name(book.getName())
+                .price(book.getPrice())
+                .cover(book.getAvatar())
+                .number(book.getNumber())
+                .build();
+
+    }
+
+
 }

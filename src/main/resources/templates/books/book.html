@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- استفاده از نام کتاب در عنوان صفحه -->
     <title th:text="${book != null ? book.name : 'جزئیات کتاب'}">جزئیات کتاب</title>
+
+    <!-- Meta Tag های CSRF (اگر CSRF فعال است) -->
+    <meta name="_csrf" th:content="${_csrf?.token}" th:if="${_csrf}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}" th:if="${_csrf}"/>
+    <!-- پایان Meta Tag های CSRF -->
+
     <!-- استایل های پایه - مشابه صفحات دیگر -->
     <style>
-        /* ... (استایل های قبلی بدون تغییر) ... */
+        /* ... (تمام استایل های CSS قبلی شما اینجا قرار می‌گیرد) ... */
 
         body {
             margin: 0;
@@ -30,10 +36,8 @@
 
         /* --- کانتینر اصلی جزئیات کتاب --- */
         .book-details-container {
-            max-width: 900px; /* عرض مناسب برای دو ستون */
-            margin: 40px auto; padding: 30px; background-color: #ffffff;
-            border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
+            max-width: 900px; margin: 40px auto; padding: 30px; background-color: #ffffff;
+            border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;
         }
 
         /* نمایش خطا در صورت عدم وجود کتاب */
@@ -43,143 +47,98 @@
         }
 
         /* --- بخش اصلی اطلاعات کتاب (دو ستونه) --- */
-        .book-main-info {
-            display: flex;
-            gap: 30px; /* فاصله بین عکس و اطلاعات */
-            margin-bottom: 30px; /* فاصله از بخش های بعدی (مثل توضیحات) */
-            flex-wrap: wrap; /* در صفحه کوچک زیر هم بیفتند */
-        }
-
-        /* ستون عکس کاور */
-        .book-cover {
-            flex: 0 0 250px; /* عرض ثابت برای عکس */
-            text-align: center;
-        }
-        .book-cover img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid #eee;
-        }
-        /* استایل برای کاور پیش‌فرض */
-        .book-cover .default-cover {
-            width: 100%; /* عرض کامل ستون */
-            height: 350px; /* ارتفاع حدودی برای کاور پیش‌فرض */
-            background-color: #e9ecef;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-style: italic;
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-        }
-
+        .book-main-info { display: flex; gap: 30px; margin-bottom: 30px; flex-wrap: wrap; }
+        .book-cover { flex: 0 0 250px; text-align: center; }
+        .book-cover img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        .book-cover .default-cover { width: 100%; height: 350px; background-color: #e9ecef; color: #6c757d; display: flex; align-items: center; justify-content: center; font-style: italic; border-radius: 5px; border: 1px solid #ced4da; }
 
         /* ستون اطلاعات متنی */
-        .book-meta {
-            flex: 1; /* باقی فضا را بگیرد */
-            min-width: 300px; /* حداقل عرض برای جلوگیری از فشرده شدن زیاد */
-        }
-
-        .book-meta h1 { /* نام کتاب */
-            font-size: 2em;
-            color: #343a40;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        /* اطلاعات مالک */
-        .owner-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            color: #555;
-            font-size: 0.95em;
-        }
-        .owner-avatar {
-            width: 35px; height: 35px; border-radius: 50%; object-fit: cover;
-            margin-left: 10px; border: 1px solid #ddd;
-        }
-        .owner-info a { /* لینک نام کاربری مالک */
-            color: #0056b3;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        .book-meta { flex: 1; min-width: 300px; }
+        .book-meta h1 { font-size: 2em; color: #343a40; margin-top: 0; margin-bottom: 15px; }
+        .owner-info { display: flex; align-items: center; margin-bottom: 20px; color: #555; font-size: 0.95em; }
+        .owner-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin-left: 10px; border: 1px solid #ddd; }
+        .owner-info a { color: #0056b3; text-decoration: none; font-weight: bold; }
         .owner-info a:hover { text-decoration: underline; }
         .owner-info .no-owner { font-style: italic; color: #6c757d; }
-
-        /* قیمت */
-        .price {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #28a745; /* سبز برای قیمت */
-            margin-bottom: 20px;
-        }
+        .price { font-size: 1.8em; font-weight: bold; color: #28a745; margin-bottom: 20px; }
         .price .toman { font-size: 0.6em; vertical-align: middle; }
-
-        /* تگ ها */
         .tags { margin-bottom: 25px; }
         .tags-label { font-weight: bold; color: #444; margin-left: 5px;}
-        .tag-link {
-            display: inline-block;
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 4px 10px;
-            border-radius: 15px; /* گرد */
-            margin: 3px;
-            font-size: 0.85em;
-            text-decoration: none;
-            border: 1px solid #ced4da;
-            transition: background-color 0.2s, color 0.2s;
-        }
+        .tag-link { display: inline-block; background-color: #e9ecef; color: #495057; padding: 4px 10px; border-radius: 15px; margin: 3px; font-size: 0.85em; text-decoration: none; border: 1px solid #ced4da; transition: background-color 0.2s, color 0.2s; }
         .tag-link:hover { background-color: #ced4da; color: #343a40; }
         .no-tags { font-style: italic; color: #6c757d; font-size: 0.9em;}
-
-        /* وضعیت موجودی */
         .availability { margin-bottom: 25px; font-size: 1.1em; }
         .in-stock { color: #28a745; font-weight: bold; }
         .out-of-stock { color: #dc3545; font-weight: bold; }
 
-        /* دکمه افزودن به سبد */
+        /* استایل دکمه افزودن به سبد */
         .add-to-cart-btn {
             display: inline-block; font-weight: bold; color: #fff; text-align: center;
             vertical-align: middle; cursor: pointer; user-select: none;
-            background-color: #007bff; /* آبی */ border: 1px solid #007bff;
+            background-color: #007bff; border: 1px solid #007bff;
             padding: 10px 25px; font-size: 1.1em; line-height: 1.5; border-radius: 5px;
             transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
         }
         .add-to-cart-btn:hover { background-color: #0056b3; border-color: #0056b3; }
         .add-to-cart-btn:disabled { background-color: #6c757d; border-color: #6c757d; cursor: not-allowed;}
 
-        /* دکمه ویرایش (اگر مالک، کاربر فعلی بود) */
-        .edit-btn {
-            display: inline-block; font-weight: normal; color: #fff; text-align: center;
-            vertical-align: middle; cursor: pointer; user-select: none;
-            background-color: #ffc107; /* زرد */ border: 1px solid #ffc107;
-            color: #333; /* متن تیره */
-            padding: 5px 12px; font-size: 0.9em; line-height: 1.5; border-radius: 5px;
+        /* استایل کنترل‌های تعداد و لینک سبد */
+        #quantity-controls { align-items: center; margin-top: 10px; }
+        .quantity-btn {
+            padding: 5px 12px; /* کمی بزرگتر */
+            font-size: 1.1em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            margin: 0 5px;
+            min-width: 35px; /* عرض یکسان */
+        }
+        .quantity-btn:hover { background-color: #eee; }
+        #cart-quantity { margin: 0 10px; font-weight: bold; font-size: 1.2em; min-width: 20px; text-align: center; display: inline-block;}
+        .view-cart-btn {
+            display: inline-block;
+            font-weight: normal; /* وزن عادی */
+            color: #fff; /* رنگ متن */
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: #17a2b8; /* آبی فیروزه‌ای */
+            border: 1px solid #17a2b8;
+            padding: 8px 18px; /* کمی کوچکتر از افزودن */
+            font-size: 1em;   /* کمی کوچکتر */
+            line-height: 1.5;
+            border-radius: 5px;
+            text-decoration: none; /* حذف خط زیر لینک */
             transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
-            margin-right: 10px; /* فاصله از دکمه افزودن به سبد */
-            text-decoration: none; /* اگر لینک باشد */
+            margin-right: 20px; /* فاصله از کنترل تعداد */
         }
-        .edit-btn:hover { background-color: #e0a800; border-color: #e0a800; }
+        .view-cart-btn:hover { background-color: #117a8b; border-color: #10707f; }
 
-        /* کلاس برای نگهداری دکمه‌ها */
-        .actions {
-            margin-top: 25px; /* فاصله از بخش موجودی */
+        /* استایل محل نمایش پیام */
+        #cart-message-area {
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center; /* پیام وسط چین */
+        }
+        #cart-message-area.success { /* کلاس برای پیام موفقیت */
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #cart-message-area.error { /* کلاس برای پیام خطا */
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
 
-        /* بخش توضیحات (در آینده) */
-        .book-description {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .book-description h2 { font-size: 1.5em; color: #343a40; margin-bottom: 15px; }
-        .book-description p { line-height: 1.7; color: #555; }
+        /* دکمه ویرایش (اگر مالک، کاربر فعلی بود) - بدون تغییر */
+        .edit-btn { /* ... استایل قبلی ... */ }
+        .actions { margin-top: 25px; }
 
     </style>
     <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
@@ -187,7 +146,7 @@
 <body>
 
 <header class="page-header">
-    <a th:href="@{/}">کتابفروشی من</a>
+    <a th:href="@{/static}">کتابفروشی من</a>
 </header>
 
 <div class="book-details-container">
@@ -195,7 +154,7 @@
     <!-- نمایش پیام خطا اگر کتاب null بود -->
     <div th:if="${book == null and errorMessage != null}" class="error-message">
         <p th:text="${errorMessage}">خطا در بارگذاری اطلاعات کتاب.</p>
-        <p><a th:href="@{/}" style="color: #721c24;">بازگشت به صفحه اصلی</a></p>
+        <p><a th:href="@{/static}" style="color: #721c24;">بازگشت به صفحه اصلی</a></p>
     </div>
 
     <!-- فقط اگر کتاب وجود داشت، اطلاعات را نمایش بده -->
@@ -203,65 +162,33 @@
         <div class="book-main-info">
             <!-- ستون کاور کتاب -->
             <div class="book-cover">
-                <!-- نمایش کاور واقعی اگر وجود داشت -->
-                <img th:if="${book.cover != null and !book.cover.isEmpty()}"
-                     th:src="@{${book.cover}}"
-                     th:alt="${book.name}" />
-                <!-- نمایش کاور پیش فرض اگر وجود نداشت -->
-                <div th:unless="${book.cover != null and !book.cover.isEmpty()}"
-                     class="default-cover">
-                    بدون تصویر
-                </div>
+                <img th:if="${book.cover != null and !book.cover.isEmpty()}" th:src="@{${book.cover}}" th:alt="${book.name}" />
+                <div th:unless="${book.cover != null and !book.cover.isEmpty()}" class="default-cover">بدون تصویر</div>
             </div>
 
             <!-- ستون اطلاعات کتاب -->
             <div class="book-meta">
-                <!-- نام کتاب -->
                 <h1 th:text="${book.name}">نام کتاب نمونه</h1>
-
-                <!-- اطلاعات مالک -->
                 <div class="owner-info">
                     <span th:if="${book.owner != null}">
-                        <!-- آواتار مالک -->
-                         <img th:if="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}"
-                              th:src="@{${book.owner.avatar}}" alt="آواتار مالک" class="owner-avatar"/>
-                         <img th:unless="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}"
-                              th:src="@{/images/avatar/default-avatar.png}" alt="آواتار پیش فرض" class="owner-avatar"/>
+                         <img th:if="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}" th:src="@{${book.owner.avatar}}" alt="آواتار مالک" class="owner-avatar"/>
+                         <img th:unless="${book.owner.avatar != null and !book.owner.avatar.isEmpty()}" th:src="@{/images/avatar/default-avatar.png}" alt="آواتار پیش فرض" class="owner-avatar"/>
                          <span>ثبت شده توسط: </span>
-                        <!-- لینک به پروفایل مالک (فرضی) -->
                          <a th:href="@{'/users/' + ${book.owner.username}}" th:text="${book.owner.username}">نام کاربر مالک</a>
-                        <!-- TODO: لینک بالا را به آدرس پروفایل واقعی کاربر تغییر دهید -->
                     </span>
-                    <span th:unless="${book.owner != null}" class="no-owner">
-                        مالک نامشخص
-                    </span>
+                    <span th:unless="${book.owner != null}" class="no-owner">مالک نامشخص</span>
                 </div>
-
-                <!-- قیمت کتاب -->
                 <div class="price">
                     <span th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">0</span>
                     <span class="toman"> تومان</span>
                 </div>
-
-                <!-- تگ ها -->
                 <div class="tags">
                     <span class="tags-label">تگ ها:</span>
                     <th:block th:if="${book.tags != null and !book.tags.isEmpty()}">
-                        <!-- لینک به صفحه هر تگ (فرضی) -->
-                        <a th:each="tag : ${book.tags}"
-                           th:href="@{'/tags/' + ${tag.slug}}"
-                           th:text="${tag.name}"
-                           class="tag-link">
-                            نام تگ
-                        </a>
-                        <!-- TODO: لینک بالا را به آدرس صفحه تگ واقعی تغییر دهید -->
+                        <a th:each="tag : ${book.tags}" th:href="@{'/tags/' + ${tag.slug}}" th:text="${tag.name}" class="tag-link">نام تگ</a>
                     </th:block>
-                    <span th:if="${book.tags == null or book.tags.isEmpty()}" class="no-tags">
-                        بدون تگ
-                    </span>
+                    <span th:if="${book.tags == null or book.tags.isEmpty()}" class="no-tags">بدون تگ</span>
                 </div>
-
-                <!-- وضعیت موجودی -->
                 <div class="availability">
                      <span th:if="${book.number != null and book.number > 0}" class="in-stock">
                          موجود در انبار (<span th:text="${book.number}"></span> عدد)
@@ -271,25 +198,35 @@
                      </span>
                 </div>
 
-                <!-- دکمه های اقدام -->
-                <!-- **** شروع بخش اضافه شده **** -->
+                <!-- **** شروع بخش تغییر یافته دکمه های اقدام **** -->
                 <div class="actions">
-                    <!-- فرم افزودن به سبد -->
-                    <!-- th:action باید به کنترلر سبد خرید شما اشاره کند -->
-                    <form th:action="@{/cart/add}" method="post" style="display: inline;">
-                        <!-- ارسال ID کتاب به صورت مخفی (مطمئن شوید book.id در DTO وجود دارد) -->
-                        <input type="hidden" name="bookId" th:value="${book.id}" />
-                        <!-- ارسال تعداد (پیش فرض ۱) به صورت مخفی -->
-                        <input type="hidden" name="quantity" value="1" />
-                        <button type="submit" class="add-to-cart-btn"
-                                th:disabled="${book.number == null or book.number <= 0}">
-                            <i class="fas fa-cart-plus"></i> <!-- آیکون اختیاری Font Awesome -->
+                    <!-- 1. Container اصلی برای دکمه ها/کنترل ها -->
+                    <div id="cart-controls-container">
+
+                        <!-- دکمه اولیه افزودن به سبد -->
+                        <!-- ID و data-book-id مهم هستند -->
+                        <!-- th:disabled برای غیرفعال کردن اولیه اگر ناموجود است -->
+                        <button type="button" id="add-to-cart-btn" class="add-to-cart-btn"
+                                th:disabled="${book.number == null or book.number <= 0}"
+                                th:data-book-id="${book.id}">
+                            <!-- <i class="fas fa-cart-plus"></i> آیکون اختیاری -->
                             افزودن به سبد خرید
                         </button>
-                    </form>
+
+                        <!-- کنترل های تعداد و لینک سبد (در ابتدا مخفی) -->
+                        <div id="quantity-controls" style="display: none;">
+                            <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+                            <span id="cart-quantity">1</span>
+                            <button type="button" class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                            <a th:href="@{/cart}" class="btn view-cart-btn">مشاهده سبد خرید</a>
+                        </div>
+                    </div>
+
+                    <!-- 2. محلی برای نمایش پیام های موفقیت/خطا -->
+                    <div id="cart-message-area"></div>
 
                     <!-- دکمه ویرایش (فقط اگر کاربر لاگین کرده مالک کتاب باشد) -->
-                    <!-- نیاز به Spring Security taglib -->
+                    <!-- (این بخش بدون تغییر مانده است - می توانید فعالش کنید) -->
                     <!--
                     <a xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
                        sec:authorize="isAuthenticated()"
@@ -300,7 +237,7 @@
                     </a>
                     -->
                 </div>
-                <!-- **** پایان بخش اضافه شده **** -->
+                <!-- **** پایان بخش تغییر یافته دکمه های اقدام **** -->
 
             </div> <!-- .book-meta -->
         </div> <!-- .book-main-info -->
@@ -309,7 +246,7 @@
         <!-- ... -->
 
         <div style="text-align: center; margin-top: 30px;">
-            <a th:href="@{/}" style="color: #007bff; text-decoration: none;">← بازگشت به فروشگاه</a>
+            <a th:href="@{/static}" style="color: #007bff; text-decoration: none;">← بازگشت به فروشگاه</a>
         </div>
 
     </div> <!-- th:if book != null -->
@@ -322,6 +259,231 @@
 
 <!-- (اختیاری) اگر از آیکون Font Awesome استفاده می‌کنید -->
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script> -->
+
+<!-- ==================== کد JavaScript ==================== -->
+<!-- بهتر است این کد در یک فایل .js جداگانه قرار گیرد و در اینجا include شود -->
+<!-- اما برای سادگی اینجا قرار داده شده است -->
+<script th:inline="javascript">
+    /*<![CDATA[*/ // این بخش برای سازگاری با XML هست، کد JS خالص بین این دو قرار می‌گیره
+
+    // --- خواندن توکن CSRF از Meta Tag ها (اگر از Spring Security استفاده می‌کنید و CSRF فعال است) ---
+    // CSRF یک مکانیزم امنیتی است که جلوی حملاتی خاص رو می‌گیره.
+    // Spring Security معمولا نیاز داره که یک توکن خاص در هر درخواست POST/PUT/DELETE فرستاده بشه.
+    // این کد مقادیر اون توکن (content) و نام هدرش (header) رو از تگ‌های <meta> در <head> صفحه می‌خونه.
+    const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content"); // مقدار توکن
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content"); // نام هدر (مثلا X-CSRF-TOKEN)
+
+    // --- پیدا کردن المان‌های HTML که باهاشون کار داریم ---
+    // با استفاده از ID هایی که در HTML تعریف کردیم، المان‌ها رو پیدا می‌کنیم تا بتونیم تغییرشون بدیم یا بهشون رویداد اضافه کنیم.
+    const addToCartBtn = document.getElementById('add-to-cart-btn');       // دکمه "افزودن به سبد خرید" اولیه
+    const quantityControls = document.getElementById('quantity-controls'); // بخشی که دکمه‌های +/- و لینک سبد رو نگه می‌داره (اول مخفیه)
+    const cartQuantitySpan = document.getElementById('cart-quantity');     // جایی که عدد تعداد رو نشون می‌دیم
+    const messageArea = document.getElementById('cart-message-area');       // جایی که پیام موفقیت یا خطا رو نشون می‌دیم
+    const bookId = addToCartBtn?.dataset.bookId; // خواندن ID کتاب از 'data-book-id' که به دکمه اضافه کردیم (علامت ؟ برای جلوگیری از خطا اگر دکمه وجود نداشت)
+
+    // --- متغیر برای نگه داشتن تعداد فعلی ---
+    // این متغیر تعداد کتابی که کاربر می‌خواد رو نگه می‌داره. فعلا با 1 شروع می‌شه.
+    let currentQuantity = 1;
+
+    // --- اضافه کردن یک "شنونده رویداد" (Event Listener) به دکمه "افزودن به سبد" ---
+    // اول چک می‌کنیم که دکمه اصلا در صفحه وجود داره یا نه (addToCartBtn)
+    if (addToCartBtn) {
+        // به دکمه می‌گیم: هر وقت روی تو 'click' شد، این تابع (function) رو اجرا کن.
+        addToCartBtn.addEventListener('click', function() {
+
+            // اگر به هر دلیلی ID کتاب رو نتونستیم بخونیم، خطا بده و خارج شو.
+            if (!bookId) {
+                showMessage('خطا: اطلاعات کتاب یافت نشد.', true);
+                return; // اجرای تابع رو متوقف می‌کنه
+            }
+
+            // --- (اختیاری) ایجاد حالت انتظار برای کاربر ---
+            // دکمه رو غیرفعال می‌کنیم و متنش رو تغییر می‌دیم تا کاربر بفهمه داره کاری انجام می‌شه.
+            addToCartBtn.disabled = true;
+            addToCartBtn.textContent = 'در حال افزودن...';
+            messageArea.textContent = ''; // پیام قبلی (اگه بوده) رو پاک می‌کنیم.
+            messageArea.className = ''; // کلاس‌های قبلی پیام رو هم پاک می‌کنیم
+
+            // --- آماده کردن داده برای ارسال به سرور ---
+            // ما باید bookId و quantity رو به سرور بفرستیم.
+            // URLSearchParams یک راه ساده برای ساختن داده‌های فرم به شکل 'key1=value1&key2=value2' هست.
+            const dataToSend = new URLSearchParams();
+            dataToSend.append('bookId', bookId); // اضافه کردن bookId
+            dataToSend.append('quantity', currentQuantity); // اضافه کردن تعداد (که فعلا 1 هست)
+
+            // --- تنظیمات درخواست AJAX (ارسال درخواست به سرور بدون رفرش صفحه) ---
+            const fetchOptions = {
+                method: 'POST', // چون می‌خوایم داده ایجاد کنیم (آیتم به سبد اضافه کنیم)
+                headers: {
+                    // به سرور می‌گیم که ما منتظر پاسخ JSON هستیم.
+                    'Accept': 'application/json'
+                    // نوع محتوای ارسالی رو لازم نیست برای URLSearchParams مشخص کنیم، خودش تنظیم می‌کنه.
+                },
+                body: dataToSend // داده‌ای که ساختیم رو در بدنه درخواست قرار می‌دیم.
+            };
+
+            // --- اضافه کردن هدر CSRF (اگر وجود داشت) ---
+            // اگر مقادیر csrfHeader و csrfToken رو از متا تگ‌ها خونده بودیم،
+            // اونها رو به هدرهای درخواست اضافه می‌کنیم.
+            if (csrfHeader && csrfToken) {
+                fetchOptions.headers[csrfHeader] = csrfToken;
+            }
+
+            // --- ارسال درخواست به سرور با استفاده از Fetch API ---
+            // fetch یک ابزار مدرن در جاوا اسکریپت برای ارسال درخواست‌های شبکه است.
+            // آدرس [[@{/cart/add}]] توسط Thymeleaf به آدرس واقعی '/cart/add' تبدیل می‌شه.
+            // fetchOptions همون تنظیماتی هست که بالا تعریف کردیم.
+            fetch(/*[[@{/cart/add}]]*/ '/cart/add', fetchOptions)
+                .then(response => { // .then یعنی وقتی پاسخی از سرور رسید، این کار رو بکن
+                    // اول چک می‌کنیم وضعیت پاسخ سرور 'ok' هست یا نه (یعنی کدهای 200 تا 299)
+                    if (!response.ok) {
+                        // اگر ok نبود (مثلا خطای 400، 404، 500)، سعی می‌کنیم پیام خطای JSON که سرور فرستاده رو بخونیم.
+                        return response.json().then(errData => {
+                            // یک خطا (Error) در جاوا اسکریپت ایجاد می‌کنیم که پیامش، پیام خطای سرور باشه.
+                            // این خطا توسط .catch پایین‌تر گرفته می‌شه.
+                            throw new Error(errData.message || `خطای سرور: ${response.status}`);
+                        });
+                    }
+                    // اگر پاسخ ok بود، بدنه پاسخ رو به عنوان JSON تفسیر کن.
+                    return response.json();
+                })
+                .then(data => { // .then یعنی وقتی تبدیل به JSON با موفقیت انجام شد، این کار رو بکن
+                    // 'data' همون آبجکت JSON هست که سرور فرستاده (مثلا {success: true, message: "..."})
+
+                    // پاسخی که از سرور اومده رو بررسی می‌کنیم
+                    if (data.success) { // اگر سرور گفته بود عملیات موفقیت‌آمیز بوده
+                        showMessage(data.message, false); // پیام موفقیت رو نشون می‌دیم (isError = false)
+                        // --- به‌روزرسانی ظاهر صفحه ---
+                        addToCartBtn.style.display = 'none'; // دکمه "افزودن" رو مخفی کن
+                        quantityControls.style.display = 'flex'; // کنترل‌های تعداد (+/- و لینک سبد) رو نشون بده (flex برای کنار هم قرار گرفتن)
+                        cartQuantitySpan.textContent = currentQuantity; // تعداد رو در span مربوطه بنویس
+                    } else { // اگر سرور گفته بود عملیات ناموفق بوده (success: false)
+                        showMessage(data.message || 'خطا در افزودن به سبد.', true); // پیام خطا رو نشون بده (isError = true)
+                        // چون ناموفق بود، دکمه رو دوباره فعال می‌کنیم.
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.textContent = 'افزودن به سبد خرید';
+                    }
+                })
+                .catch(error => { // .catch یعنی اگر در هر مرحله از fetch یا .then ها خطایی رخ داد (مثل خطای شبکه، خطای JSON، یا خطایی که خودمون throw کردیم)
+                    console.error('Fetch Error:', error); // خطا رو در کنسول مرورگر نمایش می‌دیم (برای خطایابی)
+                    showMessage(`خطا: ${error.message}`, true); // پیام خطا رو به کاربر نشون می‌دیم
+                    // دکمه رو دوباره فعال می‌کنیم تا کاربر بتونه دوباره تلاش کنه.
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.textContent = 'افزودن به سبد خرید';
+                    }
+                });
+        }); // پایان event listener
+    } // پایان if (addToCartBtn)
+
+    // --- تابع کمکی برای نمایش پیام به کاربر ---
+    // این تابع یک پیام و یک boolean (که میگه خطا هست یا نه) می‌گیره
+    // و متن و رنگ المان messageArea رو تنظیم می‌کنه.
+    function showMessage(message, isError) {
+        if (messageArea) { // چک می‌کنیم المان پیام وجود داره
+            messageArea.textContent = message; // متن پیام رو تنظیم می‌کنه
+            // از کلاس های CSS که تعریف کردیم برای استایل دهی استفاده می کنیم
+            messageArea.className = isError ? 'error' : 'success';
+        }
+    }
+
+    // --- تابع برای تغییر تعداد (نیاز به تکمیل دارد) ---
+    // این تابع وقتی روی دکمه‌های + یا - کلیک می‌شه، اجرا می‌شه.
+    // amount یا 1+ هست یا 1-.
+    // --- تابع برای تغییر تعداد (اصلاح شده) ---
+    function changeQuantity(amount) {
+        let previousQuantity = currentQuantity; // نگه داشتن تعداد قبلی در صورت خطا
+        let newQuantity = currentQuantity + amount;
+
+        if (newQuantity < 1) {
+            // اگر کاربر سعی کرد تعداد را کمتر از 1 کند، کاری نکن (یا پیام بده)
+            // showMessage("تعداد نمی‌تواند کمتر از ۱ باشد.", true); // پیام اختیاری
+            return; // از تابع خارج شو
+        }
+
+        // !! (اختیاری اما مفید) بررسی اولیه موجودی در کلاینت !!
+        // این نیاز دارد که موجودی از Thymeleaf به JS بیاید
+        const bookStockElement = document.querySelector('.in-stock span'); // پیدا کردن span تعداد موجودی
+        let bookStock = Infinity; // مقدار پیش فرض خیلی بزرگ
+        if (bookStockElement && bookStockElement.textContent.match(/\d+/)) {
+            bookStock = parseInt(bookStockElement.textContent.match(/\d+/)[0], 10);
+        }
+
+        if (newQuantity > bookStock) {
+            showMessage(`حداکثر موجودی این کتاب ${bookStock} عدد است.`, true);
+            return; // از تابع خارج شو
+        }
+        // !! پایان بررسی اولیه موجودی !!
+
+
+        // --- شروع ارسال درخواست AJAX برای آپدیت ---
+        currentQuantity = newQuantity; // تعداد جدید را (فعلا) ست می‌کنیم
+        if (cartQuantitySpan) {
+            cartQuantitySpan.textContent = currentQuantity; // نمایش تعداد جدید در UI
+        }
+        showMessage('در حال بروزرسانی تعداد...', false); // نمایش پیام موقت
+        messageArea.className = 'success'; // استایل پیام در حال انجام
+
+        // آماده کردن داده برای ارسال
+        const updateData = new URLSearchParams();
+        updateData.append('bookId', bookId); // bookId از قبل در JS موجود است
+        updateData.append('quantity', currentQuantity); // ارسال تعداد *جدید*
+
+        // تنظیمات fetch
+        const updateOptions = {
+            method: 'POST', // یا 'PUT' اگر از @PutMapping استفاده کردید
+            headers: { 'Accept': 'application/json' },
+            body: updateData
+        };
+        // اضافه کردن هدر CSRF اگر لازم است
+        if (csrfHeader && csrfToken) {
+            updateOptions.headers[csrfHeader] = csrfToken;
+        }
+
+        // ارسال درخواست به endpoint جدید
+        fetch(/*[[@{/cart/update}]]*/ '/cart/update', updateOptions)
+            .then(response => {
+                if (!response.ok) {
+                    // خواندن پیام خطای سرور
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || `خطای سرور: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // بررسی پاسخ سرور
+                if (data.success) {
+                    showMessage(data.message || 'تعداد در سبد به‌روز شد.', false);
+                    // اطمینان از اینکه تعداد نمایش داده شده با پاسخ سرور یکی است (اختیاری)
+                    if (data.newQuantity && cartQuantitySpan) {
+                        cartQuantitySpan.textContent = data.newQuantity;
+                        currentQuantity = data.newQuantity; // آپدیت متغیر JS با مقدار تایید شده سرور
+                    }
+                } else {
+                    // اگر سرور خطا برگرداند (مثلا موجودی کافی نبود)
+                    showMessage(data.message || 'خطا در بروزرسانی تعداد.', true);
+                    // *** برگرداندن تعداد به مقدار قبلی در UI ***
+                    currentQuantity = previousQuantity;
+                    if (cartQuantitySpan) {
+                        cartQuantitySpan.textContent = currentQuantity;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Update Fetch Error:', error);
+                showMessage(`خطا در بروزرسانی: ${error.message}`, true);
+                // *** برگرداندن تعداد به مقدار قبلی در UI ***
+                currentQuantity = previousQuantity;
+                if (cartQuantitySpan) {
+                    cartQuantitySpan.textContent = currentQuantity;
+                }
+            });
+        // --- پایان ارسال درخواست AJAX ---
+    }
+    /*]]>*/
+</script>
+<!-- ================== پایان کد JavaScript ================== -->
 
 </body>
 </html>

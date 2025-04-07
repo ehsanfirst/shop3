@@ -7,245 +7,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>کتابفروشی آنلاین</title>
     <style>
+        /* =========================================== */
+        /* === کدهای CSS از فایل index.html قبلی شما === */
+        /* =========================================== */
+
         .user-actions .user-avatar {
             width: 35px; /* کوچکتر شد */
             height: 35px; /* کوچکتر شد */
             border-radius: 50%;
-            object-fit: cover;
+            object-fit: cover; /* حفظ نسبت و پوشش کامل */
             vertical-align: middle;
             margin-left: 10px;
-            /* اضافه کردن این خط برای اینکه شبیه دکمه، قابل کلیک به نظر برسه */
             cursor: pointer;
         }
 
         .user-actions .logout-btn {
-            background-color: #dc3545; /* رنگ قرمز برای خروج */
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 0.9em;
-            margin-left: 20px; /* مشابه سایر لینک‌ها */
+            background-color: #dc3545; color: white; border: none; padding: 8px 15px;
+            border-radius: 15px; cursor: pointer; font-size: 0.9em; margin-left: 20px;
             vertical-align: middle;
         }
-
-        .user-actions .logout-btn:hover {
-            background-color: #c82333;
-        }
+        .user-actions .logout-btn:hover { background-color: #c82333; }
 
         body {
-            margin: 0;
-            font-family: 'Vazirmatn', sans-serif; /* یا فونت فارسی دلخواه دیگر */
-            background-color: #f8f9fa;
-            color: #333;
+            margin: 0; font-family: 'Vazirmatn', sans-serif; background-color: #f8f9fa; color: #333;
         }
 
         /* Header Styles */
         .main-header {
-            background-color: #fff;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background-color: #fff; padding: 15px 30px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-
-        .logo a {
-            text-decoration: none;
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #2c3e50; /* رنگ لوگو */
-        }
-
-        /* اگر لوگوی تصویری دارید:
-        .logo img { height: 40px; }
-        */
+        .logo a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        /* .logo img { height: 40px; } */
 
         .search-bar {
-            flex-grow: 1; /* باعث می‌شود نوار جستجو فضای خالی بین لوگو و اکشن‌ها را پر کند */
-            margin: 0 40px; /* فاصله از لوگو و اکشن‌ها */
-            position: relative; /* برای قرارگیری آیکون جستجو */
+            flex-grow: 1; margin: 0 40px; position: relative;
         }
-
         .search-bar input[type="search"] {
-            width: 100%;
-            padding: 10px 40px 10px 15px; /* فضای کافی برای آیکون در سمت راست */
-            border: 1px solid #ced4da;
-            border-radius: 20px; /* گوشه‌های گرد */
-            font-size: 1em;
-            box-sizing: border-box; /* جلوگیری از بزرگتر شدن به خاطر پدینگ */
+            width: 100%; padding: 10px 40px 10px 15px; border: 1px solid #ced4da;
+            border-radius: 20px; font-size: 1em; box-sizing: border-box;
         }
-
-        /* افزودن آیکون جستجو (نیاز به کتابخانه آیکون مثل FontAwesome یا استفاده از تصویر) */
         .search-bar::after {
-            content: '🔍'; /* یا کد آیکون فونت */
-            position: absolute;
-            right: 15px; /* تنظیم موقعیت آیکون */
-            top: 50%;
-            transform: translateY(-50%);
-            color: #777;
-            pointer-events: none; /* جلوگیری از کلیک روی آیکون */
+            content: '🔍'; position: absolute; right: 15px; top: 50%;
+            transform: translateY(-50%); color: #777; pointer-events: none;
         }
-
 
         .user-actions a {
-            text-decoration: none;
-            color: #555;
-            margin-left: 20px; /* فاصله بین لینک‌ها */
-            font-size: 0.95em;
-            padding: 8px 15px;
-            border: 1px solid transparent; /* برای حفظ فضا */
-            border-radius: 15px;
+            text-decoration: none; color: #555; margin-left: 20px; font-size: 0.95em;
+            padding: 8px 15px; border: 1px solid transparent; border-radius: 15px;
             transition: background-color 0.2s, border-color 0.2s;
         }
-
-        .user-actions a:hover {
-            background-color: #f1f1f1;
-            border-color: #ddd;
-        }
-
-        .user-actions .login-btn { /* استایل خاص برای دکمه ورود */
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-        }
-
+        .user-actions a:hover { background-color: #f1f1f1; border-color: #ddd; }
+        .user-actions .login-btn { background-color: #e9ecef; border: 1px solid #ced4da; }
 
         /* Navigation Bar Styles */
         .main-nav {
-            background-color: #ffc107; /* رنگ زرد شبیه نمونه */
-            padding: 12px 0;
-            text-align: center;
+            background-color: #ffc107; padding: 12px 0; text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-
-        .main-nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .main-nav li {
-            display: inline-block;
-            margin: 0 25px; /* فاصله بیشتر بین آیتم‌های منو */
-        }
-
+        .main-nav ul { list-style: none; padding: 0; margin: 0; }
+        .main-nav li { display: inline-block; margin: 0 25px; }
         .main-nav a {
-            text-decoration: none;
-            color: #333; /* رنگ متن تیره‌تر روی پس‌زمینه زرد */
-            font-weight: bold;
-            font-size: 1.1em;
-            transition: color 0.2s;
+            text-decoration: none; color: #333; font-weight: bold; font-size: 1.1em; transition: color 0.2s;
         }
-
-        .main-nav a:hover {
-            color: #000; /* تیره‌تر شدن رنگ هنگام هاور */
-        }
+        .main-nav a:hover { color: #000; }
 
         /* Hero Section Styles */
-        .hero-section {
-            width: 100%;
-            margin-top: 1px; /* برای جدا شدن کامل از نوبار */
-        }
-
+        .hero-section { width: 100%; margin-top: 1px; }
         .hero-section img {
-            width: 100%;
-            height: auto; /* حفظ نسبت تصویر */
-            display: block; /* حذف فضای خالی زیر تصویر */
-            max-height: 55vh; /* محدود کردن ارتفاع تصویر بزرگ */
-            object-fit: cover; /* پوشاندن کامل فضا، ممکن است بخشی از تصویر بریده شود */
+            width: 100%; height: auto; display: block; max-height: 55vh; /* ارتفاع بنر قابل تنظیم */
+            object-fit: cover; /* پوشش کامل فضا */
         }
 
-        /* Content Sections */
-        .content-section {
-            padding: 40px 30px;
-            text-align: center;
-        }
-
+        /* Content Sections Base Styles */
+        .content-section { padding: 40px 30px; }
         .content-section h2 {
-            font-size: 1.8em;
-            margin-bottom: 30px;
-            color: #343a40;
+            font-size: 1.8em; margin-bottom: 30px; color: #343a40; text-align: center;
+            padding-bottom: 8px; border-bottom: 2px solid #ffc107; display: table;
+            margin-left: auto; margin-right: auto; width: auto;
         }
 
+        /* --- استایل گرید و آیتم کتاب (مشابه categories.html) --- */
+        /* (این استایل ها برای بخش "تازه‌ها" استفاده خواهد شد) */
         .book-grid {
-            display: flex;
-            justify-content: center;
-            gap: 25px; /* فاصله بین آیتم‌ها */
-            flex-wrap: wrap; /* اجازه شکستن خط در صفحه‌های کوچک */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 30px; margin-top: 20px; padding: 0; list-style: none;
+        }
+        .book-item {
+            background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex; flex-direction: column; text-decoration: none; color: inherit;
+        }
+        .book-item:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
+        .book-cover-link { display: block; position: relative; }
+        .book-cover-link img { width: 100%; height: 250px; object-fit: cover; display: block; background-color: #eee; }
+        .book-cover-link .default-cover-text { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background-color: rgba(238, 238, 238, 0.9); color: #888; font-style: italic; height: 250px; }
+        .book-details { padding: 15px; text-align: right; flex-grow: 1; display: flex; flex-direction: column; }
+        .book-name { font-size: 1em; font-weight: bold; color: #333; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .book-price { font-size: 1.1em; font-weight: bold; color: #28a745; margin-top: auto; padding-top: 10px; }
+        .book-price .toman { font-size: 0.7em; font-weight: normal; margin-right: 3px; }
+        .no-items-message { text-align: center; padding: 40px 20px; margin-top: 30px; border: 1px dashed #ced4da; border-radius: 5px; background-color: #f8f9fa; color: #6c757d; font-size: 1.1em; }
+
+        /* استایل قبلی placeholder (دیگر برای "تازه‌ها" استفاده نمی‌شود ولی برای "پرفروش‌ها" هست) */
+        .book-placeholder {
+            border: 1px solid #e0e0e0; background-color: #fff; padding: 15px; width: 180px;
+            height: 280px; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; border-radius: 5px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            color: #aaa; margin: auto; /* برای وسط چین شدن در flex قبلی، در grid لازم نیست */
         }
 
-        .book-placeholder { /* استایل برای نمایش جای خالی کتاب‌ها */
-            border: 1px solid #e0e0e0;
-            background-color: #fff;
-            padding: 15px;
-            width: 180px; /* عرض حدودی هر کتاب */
-            height: 280px; /* ارتفاع حدودی */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            color: #aaa;
-        }
 
         /* Footer Styles */
         .main-footer {
-            background-color: #343a40; /* پس زمینه تیره */
-            color: #f8f9fa; /* متن روشن */
-            text-align: center;
-            padding: 20px;
-            margin-top: 40px;
+            background-color: #343a40; color: #f8f9fa; text-align: center; padding: 20px; margin-top: auto; /* فوتر به پایین می‌چسبد */
         }
-
-        .main-footer p {
-            margin: 0;
-            font-size: 0.9em;
-        }
+        .main-footer p { margin: 0; font-size: 0.9em; }
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
-            .main-header {
-                flex-direction: column;
-                padding: 10px 15px;
-            }
-
-            .search-bar {
-                margin: 15px 0;
-                width: 90%;
-            }
-
-            .user-actions {
-                margin-top: 10px;
-            }
-
-            .main-nav li {
-                margin: 0 10px;
-            }
-
-            .hero-section img {
-                max-height: 40vh;
-            }
-
-            .book-placeholder {
-                width: 140px;
-                height: 220px;
-            }
+            .main-header { flex-direction: column; padding: 10px 15px; }
+            .search-bar { margin: 15px 0; width: 90%; }
+            .user-actions { margin-top: 10px; }
+            .main-nav li { margin: 0 10px; }
+            .hero-section img { max-height: 40vh; }
+            /* آپدیت ریسپانسیو گرید */
+            .book-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+            .book-cover-link img { height: 200px; }
+            .book-placeholder { width: 150px; height: 240px; } /* ریسپانسیو placeholder */
+        }
+        @media (max-width: 480px) {
+            /* آپدیت ریسپانسیو گرید */
+            .book-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+            .book-cover-link img { height: 180px; }
+            .book-name { font-size: 0.9em; }
+            .book-price { font-size: 1em; }
+            .book-placeholder { width: 130px; height: 210px; } /* ریسپانسیو placeholder */
         }
 
     </style>
-    <!-- افزودن فونت وزیر (اختیاری - فایل فونت باید موجود باشد یا از CDN استفاده شود) -->
     <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
 </head>
 <body>
 
+<!-- ============ HEADER ============ -->
 <header class="main-header">
     <div class="logo">
-        <!-- اینجا می‌توانید لوگوی خود را قرار دهید (متن یا تصویر) -->
         <a th:href="@{/}">کتابفروشی من</a>
-        <!-- <img th:src="@{/images/logo.png}" alt="لوگو"/> -->
     </div>
     <div class="search-bar">
         <form action="#" th:action="@{/search}" method="get">
@@ -253,84 +161,102 @@
         </form>
     </div>
     <div class="user-actions">
-        <!-- نمایش آواتار و لینک خروج برای کاربر لاگین کرده -->
         <div sec:authorize="isAuthenticated()">
-            <!-- لینک سبد خرید -->
-            <a th:href="@{/cart}">🛒</a>
-
-            <!-- آواتار حالا یک لینک است -->
-            <a th:href="@{/profile}" style="text-decoration: none; display: inline-block; vertical-align: middle;">
-                <!-- آدرس صفحه پروفایل کاربر -->
-                <!-- نمایش آواتار کاربر -->
+            <a th:href="@{/cart}" title="سبد خرید">🛒</a>
+            <a th:href="@{/profile}" title="پروفایل کاربری" style="text-decoration: none; display: inline-block; vertical-align: middle;">
                 <img th:if="${#authentication.principal.userEntity.avatar != null and !#authentication.principal.userEntity.avatar.isEmpty()}"
-                     th:src="@{${#authentication.principal.userEntity.avatar}}"
-                     alt="آواتار کاربر" class="user-avatar"/>
-                <!-- نمایش آواتار پیش‌فرض اگر کاربر آواتار نداشت -->
+                     th:src="@{${#authentication.principal.userEntity.avatar}}" alt="آواتار کاربر" class="user-avatar"/>
                 <img th:unless="${#authentication.principal.userEntity.avatar != null and !#authentication.principal.userEntity.avatar.isEmpty()}"
-                     th:src="@{/images/avatar/default-avatar.png}"
-                     alt="آواتار پیش‌فرض" class="user-avatar"/>
+                     th:src="@{/images/avatar/default-avatar.png}" alt="آواتار پیش‌فرض" class="user-avatar"/>
             </a>
-
-            <!-- لینک خروج -->
             <form th:action="@{/logout}" method="post" style="display: inline;">
                 <button type="submit" class="logout-btn">خروج</button>
             </form>
         </div>
-
-        <!-- نمایش لینک ورود/عضویت برای کاربر مهمان -->
         <div sec:authorize="!isAuthenticated()">
-            <a href="#">🛒</a>
+            <a th:href="@{/cart}" title="سبد خرید">🛒</a>
             <a th:href="@{/login}" class="login-btn">ورود / عضویت</a>
         </div>
     </div>
-
 </header>
+<!-- ============ END HEADER ============ -->
 
+<!-- ============ NAV ============ -->
 <nav class="main-nav">
     <ul>
+        <!-- لینک تگ های نمونه - شما باید با تگ های واقعی جایگزین کنید -->
         <li><a th:href="@{/categories/story}">داستانی</a></li>
         <li><a th:href="@{/categories/adult}">بزرگسال</a></li>
         <li><a th:href="@{/categories/children}">کودک و نوجوان</a></li>
-        <li><a th:href="@{/new-arrivals}">تازه‌های نشر</a></li>
-        <li><a th:href="@{/best-sellers}">پرفروش‌ها</a></li>
+        <li><a th:href="@{/tags/new-arrivals}">تازه‌های نشر</a></li>
+        <li><a th:href="@{/tags/best-sellers}">پرفروش‌ها</a></li>
     </ul>
 </nav>
+<!-- ============ END NAV ============ -->
 
+<!-- ============ HERO SECTION ============ -->
 <section class="hero-section">
-    <!-- نمایش تصویر اصلی شما -->
     <img th:src="@{/images/page/page1.jpg}" alt="بنر اصلی کتابفروشی"/>
 </section>
+<!-- ============ END HERO SECTION ============ -->
 
 <main>
-    <!-- بخش نمایش کتاب‌های نمونه -->
+    <!-- ============ بخش تازه‌ها (جایگزین شده) ============ -->
     <section class="content-section">
-        <h2>تازه‌های کتاب بزرگسال</h2>
-        <div class="book-grid">
-            <!-- اینجا در آینده لیست واقعی کتاب‌ها با th:each قرار می‌گیرد -->
-            <div class="book-placeholder">کتاب ۱</div>
-            <div class="book-placeholder">کتاب ۲</div>
-            <div class="book-placeholder">کتاب ۳</div>
-            <div class="book-placeholder">کتاب ۴</div>
-            <div class="book-placeholder">کتاب ۵</div>
+        <h2>تازه‌ها</h2>
+        <!-- بررسی وجود محتوا -->
+        <div th:if="${newestBooks != null and newestBooks.hasContent()}">
+            <div class="book-grid">
+                <!-- حلقه روی کتاب‌ها -->
+                <a th:each="book : ${newestBooks.content}"
+                   th:href="@{/books/{id}(id=${book.id})}"
+                   class="book-item">
+                    <!-- کاور -->
+                    <div class="book-cover-link">
+                        <img th:if="${book.cover != null and !book.cover.isEmpty()}"
+                             th:src="@{${book.cover}}" th:alt="${book.name}" />
+                        <div th:unless="${book.cover != null and !book.cover.isEmpty()}"
+                             class="default-cover-text">بدون تصویر</div>
+                    </div>
+                    <!-- جزئیات -->
+                    <div class="book-details">
+                        <span class="book-name" th:text="${book.name}">نام کتاب</span>
+                        <div class="book-price">
+                            <span th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="toman">تومان</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- پیام خالی -->
+        <div th:if="${newestBooks == null or newestBooks.isEmpty()}" class="no-items-message">
+            <p>در حال حاضر کتاب جدیدی یافت نشد.</p>
         </div>
     </section>
+    <!-- ============ END بخش تازه‌ها ============ -->
 
-    <section class="content-section" style="background-color: #e9ecef;"> <!-- پس زمینه متفاوت برای تمایز -->
+    <!-- ============ بخش پرفروش‌ها (فعلا با placeholder) ============ -->
+    <section class="content-section" style="background-color: #e9ecef;">
         <h2>پرفروش‌ترین‌ها</h2>
         <div class="book-grid">
-            <div class="book-placeholder">کتاب ۶</div>
-            <div class="book-placeholder">کتاب ۷</div>
-            <div class="book-placeholder">کتاب ۸</div>
-            <div class="book-placeholder">کتاب ۹</div>
-            <div class="book-placeholder">کتاب ۱۰</div>
+            <!-- Placeholders -->
+            <div class="book-placeholder">کتاب پرفروش ۱</div>
+            <div class="book-placeholder">کتاب پرفروش ۲</div>
+            <div class="book-placeholder">کتاب پرفروش ۳</div>
+            <div class="book-placeholder">کتاب پرفروش ۴</div>
+            <div class="book-placeholder">کتاب پرفروش ۵</div>
         </div>
     </section>
-    <!-- می‌توانید بخش‌های بیشتری اضافه کنید -->
+    <!-- ============ END بخش پرفروش‌ها ============ -->
+
 </main>
 
+<!-- ============ FOOTER ============ -->
 <footer class="main-footer">
     <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
 </footer>
+<!-- ============ END FOOTER ============ -->
 
 </body>
 </html>

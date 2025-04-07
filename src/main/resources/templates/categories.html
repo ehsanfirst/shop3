@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کتاب‌های دسته‌بندی</title>
+    <!-- استایل های پایه -->
+    <style>
+        /* --- تمام کدهای CSS شما اینجا قرار می‌گیرد --- */
+        /* (کدهای CSS هدر، فوتر، کانتینر، عنوان، گرید کتاب، آیتم کتاب، صفحه‌بندی و ...) */
+        body { margin: 0; font-family: 'Vazirmatn', sans-serif; background-color: #f8f9fa; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        .page-header, .page-footer { background-color: #fff; padding: 15px 30px; text-align: center; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .page-header a { text-decoration: none; font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .page-footer { margin-top: auto; background-color: #343a40; color: #f8f9fa; padding: 20px; border-top: 1px solid #444; border-bottom: none; box-shadow: none;}
+        .page-footer p { margin: 0; font-size: 0.9em; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 25px; }
+        .section-title { font-size: 1.8em; color: #343a40; margin-bottom: 30px; padding-bottom: 8px; border-bottom: 2px solid #ffc107; display: inline-block; text-align: center; width: 100%; box-sizing: border-box; }
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 30px; margin-top: 20px; padding: 0; list-style: none; }
+        .book-item { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); overflow: hidden; transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+        .book-item:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
+        .book-cover-link { display: block; position: relative; }
+        .book-cover-link img { width: 100%; height: 250px; object-fit: cover; display: block; background-color: #eee; }
+        .book-cover-link .default-cover-text { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background-color: rgba(238, 238, 238, 0.9); color: #888; font-style: italic; height: 250px; }
+        .book-details { padding: 15px; text-align: right; flex-grow: 1; display: flex; flex-direction: column; }
+        .book-name { font-size: 1em; font-weight: bold; color: #333; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .book-price { font-size: 1.1em; font-weight: bold; color: #28a745; margin-top: auto; padding-top: 10px; }
+        .book-price .toman { font-size: 0.7em; font-weight: normal; margin-right: 3px; }
+        .no-items-message { text-align: center; padding: 40px 20px; margin-top: 30px; border: 1px dashed #ced4da; border-radius: 5px; background-color: #f8f9fa; color: #6c757d; font-size: 1.1em; }
+        .pagination-nav { margin-top: 35px; }
+        .pagination { display: flex; justify-content: center; padding-left: 0; list-style: none; border-radius: .25rem; }
+        .page-item .page-link { position: relative; display: block; padding: .5rem .75rem; margin-right: -1px; line-height: 1.25; color: #007bff; background-color: #fff; border: 1px solid #dee2e6; text-decoration: none; transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out; }
+        .page-item.active .page-link { z-index: 3; color: #fff; background-color: #007bff; border-color: #007bff; }
+        .page-item.disabled .page-link { color: #6c757d; pointer-events: none; cursor: auto; background-color: #fff; border-color: #dee2e6; }
+        .page-item:first-child .page-link { margin-right: 0; border-top-right-radius: .25rem; border-bottom-right-radius: .25rem; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .page-item:last-child .page-link { border-top-left-radius: .25rem; border-bottom-left-radius: .25rem; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .page-link:hover { color: #0056b3; background-color: #e9ecef; border-color: #dee2e6; }
+        .pagination-info { text-align: center; margin-top: 15px; font-size: 0.9em; color: #6c757d; }
+        @media (max-width: 768px) { .book-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; } .book-cover-link img { height: 200px; } .section-title { font-size: 1.5em;} }
+        @media (max-width: 480px) { .book-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; } .book-cover-link img { height: 180px; } .book-name { font-size: 0.9em; } .book-price { font-size: 1em; } }
+    </style>
+    <!-- Font (Optional) -->
+    <!-- <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+
+<!-- ****** هدر صفحه به صورت دستی ****** -->
+<header class="page-header">
+    <a th:href="@{/}">کتابفروشی من</a>
+    <!-- اگر کدهای بیشتری برای هدر داری (مثل جستجو، لینک کاربر) اینجا اضافه کن -->
+</header>
+<!-- ****** پایان هدر دستی ****** -->
+
+
+<!-- محتوای اصلی -->
+<div class="container">
+
+    <h2 class="section-title">کتاب‌های دسته‌بندی</h2>
+    <!-- <h2 class="section-title" th:text="'کتاب‌های دسته‌بندی: ' + ${tag.name}">عنوان دسته‌بندی</h2> -->
+
+    <div th:if="${books != null and books.hasContent()}">
+        <div class="book-grid">
+            <a th:each="book : ${books.content}"
+               th:href="@{/books/{id}(id=${book.id})}"
+               class="book-item">
+                <div class="book-cover-link">
+                    <img th:if="${book.cover != null and !book.cover.isEmpty()}"
+                         th:src="@{${book.cover}}"
+                         th:alt="${book.name}" />
+                    <div th:unless="${book.cover != null and !book.cover.isEmpty()}"
+                         class="default-cover-text">
+                        بدون تصویر
+                    </div>
+                </div>
+                <div class="book-details">
+                    <span class="book-name" th:text="${book.name}">نام کتاب</span>
+                    <div class="book-price">
+                        <span th:text="${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                        <span class="toman">تومان</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- بخش ناوبری صفحه‌بندی -->
+        <nav aria-label="Page navigation" th:if="${books.totalPages > 1}" class="pagination-nav">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${!books.hasPrevious()} ? 'disabled'">
+                    <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${books.number - 1}, size=${books.size}, sort=${books.sort.toString().replace(': ', ',')})}" aria-label="قبلی"> « </a>
+                </li>
+                <th:block th:each="pageNumber : ${#numbers.sequence(0, books.totalPages - 1)}">
+                    <li class="page-item" th:if="${pageNumber == 0 or pageNumber == books.totalPages - 1 or (pageNumber >= books.number - 1 and pageNumber <= books.number + 1) or books.totalPages <= 5}"
+                        th:classappend="${pageNumber == books.number} ? 'active'">
+                        <a class="page-link" th:if="${pageNumber != books.number}"
+                           th:href="@{${#httpServletRequest.requestURI}(page=${pageNumber}, size=${books.size}, sort=${books.sort.toString().replace(': ', ',')})}"
+                           th:text="${pageNumber + 1}"></a>
+                        <span class="page-link" th:if="${pageNumber == books.number}"
+                              th:text="${pageNumber + 1}"></span>
+                    </li>
+                    <li class="page-item disabled" th:if="${(pageNumber == 1 and books.number > 2 and books.totalPages > 5) or (pageNumber == books.totalPages - 2 and books.number < books.totalPages - 3 and books.totalPages > 5)}">
+                        <span class="page-link">...</span>
+                    </li>
+                </th:block>
+                <li class="page-item" th:classappend="${!books.hasNext()} ? 'disabled'">
+                    <a class="page-link" th:href="@{${#httpServletRequest.requestURI}(page=${books.number + 1}, size=${books.size}, sort=${books.sort.toString().replace(': ', ',')})}" aria-label="بعدی"> » </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="pagination-info" th:if="${books.totalElements > 0}">
+            نمایش <span th:text="${books.numberOfElements}"></span> کتاب از <span th:text="${books.totalElements}"></span> مورد | صفحه <span th:text="${books.number + 1}"></span> از <span th:text="${books.totalPages}"></span>
+        </div>
+    </div>
+
+    <div th:if="${books == null or books.isEmpty()}" class="no-items-message">
+        <p>متاسفانه هیچ کتابی در این دسته‌بندی یافت نشد.</p>
+        <p><a th:href="@{/}" style="font-size: 0.9em; color: #007bff;">بازگشت به صفحه اصلی</a></p>
+    </div>
+
+</div> <!-- /container -->
+
+
+<!-- ****** فوتر صفحه به صورت دستی ****** -->
+<footer class="page-footer">
+    <p>© ۱۴۰۳ - تمامی حقوق برای کتابفروشی من محفوظ است.</p>
+</footer>
+<!-- ****** پایان فوتر دستی ****** -->
+
+</body>
+</html>
